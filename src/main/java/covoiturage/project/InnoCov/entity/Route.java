@@ -6,7 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Builder
@@ -30,4 +32,7 @@ public class Route {
 
     @ManyToOne
     private User driver;
+
+    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RouteBooking> bookings = new ArrayList<>();
 }

@@ -7,4 +7,7 @@ import org.springframework.http.ResponseEntity;
 public interface RouteService {
 
     ResponseEntity<ApiResponse<String>> addRoute(RouteDto route);
+
+    ResponseEntity<RouteDto> getAllRouteInformation(Integer routeId);
+
 }

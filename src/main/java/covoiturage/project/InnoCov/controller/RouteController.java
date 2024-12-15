@@ -5,10 +5,7 @@ import covoiturage.project.InnoCov.service.serviceInterface.RouteService;
 import covoiturage.project.InnoCov.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/route")
@@ -21,6 +18,11 @@ public class RouteController {
     @PostMapping("/new-route")
     public ResponseEntity<ApiResponse<String>> addRoute(@RequestBody RouteDto route) {
         return routeService.addRoute(route);
+    }
+
+    @GetMapping("/route-information/{routeId}")
+    public ResponseEntity<RouteDto> getAllRouteInformations(@PathVariable Integer routeId) {
+        return routeService.getAllRouteInformation(routeId);
     }
 
 }

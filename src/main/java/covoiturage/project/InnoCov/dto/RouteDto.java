@@ -1,12 +1,15 @@
 package covoiturage.project.InnoCov.dto;
 
 import covoiturage.project.InnoCov.entity.Route;
+import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.tools.Convertible;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -18,6 +21,7 @@ public class RouteDto implements Convertible<Route> {
     private Date departureDate;
     private int numberOfPassengers;
     private UserDto driver;
+    private List<UserDto> passengers;
 
     public RouteDto(Route route) {
         this.id = route.getId();
@@ -25,6 +29,15 @@ public class RouteDto implements Convertible<Route> {
         this.arrival = route.getArrival();
         this.departureDate = route.getDepartureDate();
         this.driver = new UserDto(route.getDriver());
+    }
+
+    public RouteDto(Route route, List<User> passengers) {
+        this.id = route.getId();
+        this.departure = route.getDeparture();
+        this.arrival = route.getArrival();
+        this.departureDate = route.getDepartureDate();
+        this.driver = new UserDto(route.getDriver());
+        this.passengers = passengers.stream().map(UserDto::new).collect(Collectors.toList());
     }
 
     @Override
