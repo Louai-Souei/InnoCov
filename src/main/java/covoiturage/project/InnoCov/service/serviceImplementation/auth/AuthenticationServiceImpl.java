@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -153,6 +155,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .revoked(false)
                 .build();
         tokenRepository.save(token);
+    }
+
+    public User getActiveUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
     }
 
 }
