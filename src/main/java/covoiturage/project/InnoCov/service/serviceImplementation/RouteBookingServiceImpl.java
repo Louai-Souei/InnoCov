@@ -30,7 +30,6 @@ public class RouteBookingServiceImpl implements RouteBookingService {
     public ResponseEntity<ApiResponse<String>> addBooking(Integer routeId) {
         try {
             User activeUser = authenticationService.getActiveUser();
-
             Route route = routeRepository.findById(routeId)
                     .orElseThrow(() -> new IllegalArgumentException("Route not found"));
 

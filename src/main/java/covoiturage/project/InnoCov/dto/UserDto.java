@@ -17,7 +17,6 @@ public class UserDto implements Convertible<User> {
     private String lastname;
     private String phone;
     private String email;
-    private String password;
     private UserRole userRole;
     private Role role;
 
@@ -27,7 +26,6 @@ public class UserDto implements Convertible<User> {
         this.lastname = user.getLastname();
         this.phone = user.getPhone();
         this.email = user.getEmail();
-        this.password = user.getPassword();
         this.userRole = user.getUserRole();
         this.role = user.getRole();
     }
@@ -39,7 +37,6 @@ public class UserDto implements Convertible<User> {
         user.setLastname(lastname);
         user.setPhone(phone);
         user.setEmail(email);
-        user.setPassword(password);
         user.setUserRole(userRole);
         user.setRole(role);
         return user;
