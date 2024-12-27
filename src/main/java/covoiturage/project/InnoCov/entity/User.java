@@ -1,6 +1,5 @@
 package covoiturage.project.InnoCov.entity;
 
-
 import covoiturage.project.InnoCov.entity.enums.Role;
 import covoiturage.project.InnoCov.entity.enums.UserRole;
 import covoiturage.project.InnoCov.tools.tokenTools.Token;
@@ -23,19 +22,21 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Integer id;
 
+    @Column(nullable = false, length = 50)
     private String firstname;
 
+    @Column(nullable = false, length = 50)
     private String lastname;
 
+    @Column(nullable = false)
     private String password;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = 100)
     private String email;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = 15)
     private String phone;
 
     @Enumerated(EnumType.STRING)
@@ -44,15 +45,21 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "complainer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "complainer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Complaint> complaintsMade = new ArrayList<>();
 
-    @OneToMany(mappedBy = "targetUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "targetUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Complaint> complaintsReceived = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Token> tokens;
+
+    @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Route> drivenRoutes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "passenger", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RouteBooking> bookings = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -88,5 +95,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }

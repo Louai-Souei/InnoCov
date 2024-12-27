@@ -38,10 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("Request Path: " + request.getRequestURI());
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("Missing or invalid Authorization header");
+/*            System.out.println("Missing or invalid Authorization header");
             System.out.println("----------------------------------------------------------------------------------");
             System.out.println(authHeader);
-            System.out.println("----------------------------------------------------------------------------------");
+            System.out.println("----------------------------------------------------------------------------------");*/
             filterChain.doFilter(request, response);
             return;
         }
