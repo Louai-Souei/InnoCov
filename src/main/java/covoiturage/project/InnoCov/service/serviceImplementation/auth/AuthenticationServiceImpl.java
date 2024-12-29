@@ -61,14 +61,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
         var savedUser = userRepository.save(user);
         var jwtToken = jwtServiceImpl.generateToken(user);
+        return getAuthenticationResponse(user, savedUser, jwtToken);
+
+    }
+
+    private AuthenticationResponse getAuthenticationResponse(User user, User savedUser, String jwtToken) {
         saveUserToken(savedUser, jwtToken, TokenType.ACCESS);
         var refreshToken = jwtServiceImpl.generateRefreshToken(user);
         saveUserToken(savedUser, refreshToken, TokenType.REFRESH);
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .userId(user.getId())
+                .userRole(user.getUserRole().name())
+                .email(user.getEmail())
                 .build();
-
     }
 
 
@@ -85,13 +92,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .orElseThrow();
         var jwtToken = jwtServiceImpl.generateToken(user);
         revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken, TokenType.ACCESS);
-        var refreshToken = jwtServiceImpl.generateRefreshToken(user);
-        saveUserToken(user, refreshToken, TokenType.REFRESH);
-        return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+        return getAuthenticationResponse(user, user, jwtToken);
     }
 
     public void refreshToken(
