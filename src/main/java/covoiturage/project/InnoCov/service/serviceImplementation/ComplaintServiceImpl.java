@@ -25,24 +25,18 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public ResponseEntity<ApiResponse<ComplaintDto>> addComplaint(ComplaintDto complaintDto) {
-        // Get active user
         User activeUser = authenticationService.getActiveUser();
-
-        // Find target user
         User targetUser = userRepository.findById(complaintDto.getTargetUser().getId())
                 .orElseThrow(() -> new RuntimeException("Target user not found"));
 
-        // Convert DTO to entity and set values
         Complaint complaint = complaintDto.convert();
         complaint.setComplainer(activeUser);
         complaint.setTargetUser(targetUser);
         complaint.setCreatedAt(new Date());
         complaint.setResolved(false);
 
-        // Save complaint
         Complaint savedComplaint = complaintRepository.save(complaint);
 
-        // Create ApiResponse with success message and the saved ComplaintDto
         ApiResponse<ComplaintDto> response = new ApiResponse<>(
                 "Complaint Added",
                 true,
@@ -50,7 +44,6 @@ public class ComplaintServiceImpl implements ComplaintService {
                 new ComplaintDto(savedComplaint)
         );
 
-        // Return response
         return ResponseEntity.ok(response);
     }
 

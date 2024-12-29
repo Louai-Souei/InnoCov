@@ -1,7 +1,7 @@
 package covoiturage.project.InnoCov.entity;
 
+import covoiturage.project.InnoCov.entity.enums.Occupation;
 import covoiturage.project.InnoCov.entity.enums.Role;
-import covoiturage.project.InnoCov.entity.enums.UserRole;
 import covoiturage.project.InnoCov.tools.tokenTools.Token;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,10 +40,10 @@ public class User implements UserDetails {
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    private UserRole userRole;
+    private Role role;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Occupation occupation;
 
     @OneToMany(mappedBy = "complainer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Complaint> complaintsMade = new ArrayList<>();
@@ -63,7 +63,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(userRole.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_"+role.name()));
     }
 
     @Override

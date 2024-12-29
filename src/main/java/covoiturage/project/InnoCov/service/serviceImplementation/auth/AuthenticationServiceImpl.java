@@ -56,8 +56,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .phone(registerRequest.getPhone())
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .userRole(registerRequest.getUserRole())
                 .role(registerRequest.getRole())
+                .occupation(registerRequest.getOccupation())
                 .build();
         var savedUser = userRepository.save(user);
         var jwtToken = jwtServiceImpl.generateToken(user);
@@ -65,7 +65,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     }
 
-    private AuthenticationResponse getAuthenticationResponse(User user, User savedUser, String jwtToken) {
+    private AuthenticationResponse getAuthenticationResponse(
+            User user, User savedUser, String jwtToken
+    ) {
         saveUserToken(savedUser, jwtToken, TokenType.ACCESS);
         var refreshToken = jwtServiceImpl.generateRefreshToken(user);
         saveUserToken(savedUser, refreshToken, TokenType.REFRESH);
@@ -73,8 +75,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .userId(user.getId())
-                .userRole(user.getUserRole().name())
+                .role(user.getRole().name())
                 .email(user.getEmail())
+                .occupation(user.getOccupation().name())
                 .build();
     }
 

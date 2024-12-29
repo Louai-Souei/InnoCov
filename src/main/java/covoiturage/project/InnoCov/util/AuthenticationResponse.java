@@ -17,8 +17,10 @@ public class AuthenticationResponse {
     private String refreshToken;
     @JsonProperty("userId")
     private Integer userId;
-    @JsonProperty("userRole")
-    private String userRole;
+    @JsonProperty("role")
+    private String role;
     @JsonProperty("email")
     private String email;
+    @JsonProperty("occupation")
+    private String occupation;
 }

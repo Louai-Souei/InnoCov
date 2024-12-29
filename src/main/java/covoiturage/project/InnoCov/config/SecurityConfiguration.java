@@ -21,6 +21,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+import static covoiturage.project.InnoCov.entity.enums.Role.ADMIN;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -38,11 +40,10 @@ public class SecurityConfiguration {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth ->
-                        auth
+                .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
-                                /*.requestMatchers("/task/load/all").hasAnyRole(ADMIN.name())
-                                .requestMatchers(HttpMethod.GET, "/task/load/all").hasAnyAuthority(ADMIN_READ.name())*/
+//                              .requestMatchers("/complaint/**").hasAnyRole(ADMIN.name())
+//                              .requestMatchers(HttpMethod.GET, "/task/load/all").hasAnyAuthority(ADMIN_READ.name())
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
