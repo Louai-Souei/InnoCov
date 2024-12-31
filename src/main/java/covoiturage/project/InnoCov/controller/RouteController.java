@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/route")
 @RequiredArgsConstructor
@@ -23,6 +25,11 @@ public class RouteController {
     @GetMapping("/route-information/{routeId}")
     public ResponseEntity<RouteDto> getAllRouteInformations(@PathVariable Integer routeId) {
         return routeService.getAllRouteInformation(routeId);
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<RouteDto>> getAvailableRoutes() {
+        return routeService.getAvailableRoutes();
     }
 
 }

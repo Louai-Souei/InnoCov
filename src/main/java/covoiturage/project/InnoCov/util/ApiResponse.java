@@ -1,18 +1,14 @@
 package covoiturage.project.InnoCov.util;
 
-
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class ApiResponse<T> {
 
-    private String title;
     private boolean success;
     private String message;
     private T data;
@@ -22,9 +18,9 @@ public class ApiResponse<T> {
         this.message = message;
     }
 
-    public ApiResponse(boolean success, String title, String message) {
+    public ApiResponse(boolean success, String message, T data) {
         this.success = success;
-        this.title = title;
         this.message = message;
+        this.data = data;
     }
 }

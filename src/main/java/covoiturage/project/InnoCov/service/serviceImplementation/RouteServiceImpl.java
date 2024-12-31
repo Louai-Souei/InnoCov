@@ -59,4 +59,25 @@ public class RouteServiceImpl implements RouteService {
         return ResponseEntity.ok(routeDto);
     }
 
+    @Transactional
+    @Override
+    public ResponseEntity<List<RouteDto>> getAvailableRoutes() {
+        try {
+            List<Route> routes = routeRepository.findAvailableRoutesWithCapacity();
+            List<RouteDto> routeDtos = routes.stream()
+                    .map(route -> new RouteDto(
+                            route,
+                            route.getBookings().stream()
+                                    .map(RouteBooking::getPassenger)
+                                    .collect(Collectors.toList())))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(routeDtos);
+        } catch (Exception e) {
+            log.error("Error while fetching available routes: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+
 }

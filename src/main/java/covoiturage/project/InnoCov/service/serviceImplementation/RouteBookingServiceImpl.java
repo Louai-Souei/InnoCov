@@ -1,5 +1,6 @@
 package covoiturage.project.InnoCov.service.serviceImplementation;
 
+import covoiturage.project.InnoCov.dto.RouteDto;
 import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.entity.User;
@@ -14,7 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +41,7 @@ public class RouteBookingServiceImpl implements RouteBookingService {
             if (currentBookings >= route.getNumberOfPassengers()) {
                 log.warn("Route is fully booked: {}", route.getId());
                 return ResponseEntity.badRequest()
-                        .body(new ApiResponse<>(false, "Error", "No available spots on this route."));
+                        .body(new ApiResponse<>(false, "No available spots on this route."));
             }
 
             RouteBooking routeBooking = new RouteBooking();
@@ -48,14 +52,13 @@ public class RouteBookingServiceImpl implements RouteBookingService {
             routeBookingRepository.save(routeBooking);
             log.info("Booking added successfully: {}", routeBooking);
 
-            return ResponseEntity.ok(new ApiResponse<>(true, "Success", "Booking added successfully."));
+            return ResponseEntity.ok(new ApiResponse<>(true, "Booking added successfully."));
         } catch (Exception e) {
             log.error("Error while adding booking: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
-                    .body(new ApiResponse<>(false, "Error", "Failed to add booking."));
+                    .body(new ApiResponse<>(false, "Failed to add booking."));
         }
     }
-
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -68,5 +71,28 @@ public class RouteBookingServiceImpl implements RouteBookingService {
         return Math.max(availableSeats, 0);
     }
 
+    @Transactional(rollbackOn = Exception.class)
+    @Override
+    public ResponseEntity<ApiResponse<List<RouteDto>>> getAllBookedRoutesByActiveUser() {
+        try {
+            User activeUser = authenticationService.getActiveUser();
 
+            List<RouteBooking> bookings = routeBookingRepository.findByPassenger(activeUser);
+
+            List<RouteDto> routeDtos = bookings.stream()
+                    .map(routeBooking -> new RouteDto(routeBooking.getRoute(), routeBooking.getRoute().getBookings().stream()
+                            .map(RouteBooking::getPassenger)
+                            .collect(Collectors.toList())))
+                    .sorted(Comparator.comparing(RouteDto::getDepartureDate))
+                    .collect(Collectors.toList());
+
+            log.info("Found {} routes for active user", routeDtos.size());
+
+            return ResponseEntity.ok(new ApiResponse<>(true, "Routes fetched successfully.", routeDtos));
+        } catch (Exception e) {
+            log.error("Error while fetching routes for active user: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, "Failed to fetch routes."));
+        }
+    }
 }

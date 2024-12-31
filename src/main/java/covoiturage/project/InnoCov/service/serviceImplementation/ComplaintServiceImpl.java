@@ -38,7 +38,6 @@ public class ComplaintServiceImpl implements ComplaintService {
         Complaint savedComplaint = complaintRepository.save(complaint);
 
         ApiResponse<ComplaintDto> response = new ApiResponse<>(
-                "Complaint Added",
                 true,
                 "Complaint has been successfully added",
                 new ComplaintDto(savedComplaint)
@@ -49,7 +48,6 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public List<ComplaintDto> getComplaintsByTargetUser(Integer targetUserId) {
-
         return complaintRepository.findByTargetUserId(targetUserId).stream()
                 .map(ComplaintDto::new)
                 .toList();
@@ -66,7 +64,6 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public ResponseEntity<ApiResponse<ComplaintDto>> resolveComplaint(Integer complaintId) {
-
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
@@ -74,7 +71,6 @@ public class ComplaintServiceImpl implements ComplaintService {
         Complaint updatedComplaint = complaintRepository.save(complaint);
 
         ApiResponse<ComplaintDto> response = new ApiResponse<>(
-                "Complaint Resolved",
                 true,
                 "The complaint has been resolved successfully",
                 new ComplaintDto(updatedComplaint)
