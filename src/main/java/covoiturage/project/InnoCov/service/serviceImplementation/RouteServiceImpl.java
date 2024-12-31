@@ -59,4 +59,25 @@ public class RouteServiceImpl implements RouteService {
         return ResponseEntity.ok(routeDto);
     }
 
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(String email) {
+        try {
+            List<Route> routes = routeRepository.findByDriverEmail(email);
+            if (routes.isEmpty()) {
+                return ResponseEntity.ok(List.of()); // Renvoie une liste vide si aucun résultat
+            }
+
+            List<RouteDto> routeDtos = routes.stream()
+                    .map(route -> new RouteDto(route))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(routeDtos);
+        } catch (Exception e) {
+            log.error("Error fetching routes for driver with email {}: {}", email, e.getMessage());
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+
 }
