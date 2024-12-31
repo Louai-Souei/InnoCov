@@ -30,5 +30,17 @@ public class RouteController {
     public ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(@PathVariable String email) {
         return routeService.getRoutesByDriverEmail(email);
     }
-
+    @PutMapping("/{id}")
+    public ResponseEntity<RouteDto> updateRoute(@PathVariable Integer id, @RequestBody RouteDto routeDto) {
+        RouteDto updatedRoute = routeService.updateRoute(id, routeDto);
+        return ResponseEntity.ok(updatedRoute);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRoute(@PathVariable Integer id) {
+        boolean isDeleted = routeService.deleteRouteById(id);
+        if (isDeleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(404).body("Route not found with ID: " + id);
+    }
 }

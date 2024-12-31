@@ -16,10 +16,12 @@ public class RouteBookingDto implements Convertible<RouteBooking> {
     private UserDto passenger;
     private RouteDto route;
     private Date bookingDate;
+    private String status;
 
     public RouteBookingDto(RouteBooking routeBooking) {
         this.id = routeBooking.getId();
         this.bookingDate = routeBooking.getBookingDate();
+        this.status = routeBooking.getStatus();
         if (routeBooking.getPassenger() != null) {
             this.passenger = new UserDto(routeBooking.getPassenger());
         }
@@ -33,6 +35,7 @@ public class RouteBookingDto implements Convertible<RouteBooking> {
         RouteBooking routeBooking = new RouteBooking();
         routeBooking.setId(this.id);
         routeBooking.setBookingDate(this.bookingDate);
+        routeBooking.setStatus(this.status);
 
         if (this.passenger != null) {
             routeBooking.setPassenger(this.passenger.convert());

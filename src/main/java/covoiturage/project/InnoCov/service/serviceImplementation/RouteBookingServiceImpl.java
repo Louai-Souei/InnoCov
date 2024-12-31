@@ -1,5 +1,6 @@
 package covoiturage.project.InnoCov.service.serviceImplementation;
 
+import covoiturage.project.InnoCov.dto.RouteBookingDto;
 import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.entity.User;
@@ -8,6 +9,7 @@ import covoiturage.project.InnoCov.repository.RouteRepository;
 import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteBookingService;
 import covoiturage.project.InnoCov.util.ApiResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,4 +73,62 @@ public class RouteBookingServiceImpl implements RouteBookingService {
     }
 
 
+    @Override
+    public RouteBookingDto changeBookingStatus(Integer bookingId, String status) {
+        RouteBooking routeBooking = routeBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("RouteBooking with ID " + bookingId + " not found"));
+
+        if (!status.equals("accepted") && !status.equals("refused") && !status.equals("default")) {
+            throw new IllegalArgumentException("Invalid status value: " + status);
+        }
+
+        routeBooking.setStatus(status);
+        routeBookingRepository.save(routeBooking);
+        return new RouteBookingDto(routeBooking);
+    }
+
+
+    @Override
+    public List<RouteBookingDto> getRouteBookingsByPassengerEmail(String email) {
+        List<RouteBooking> routeBookings = routeBookingRepository.findByPassengerEmail(email);
+        return routeBookings.stream()
+                .map(RouteBookingDto::new)
+                .collect(Collectors.toList());
+    }
+
+
+
+
+
+    /**
+     * Annuler une réservation par un passager.
+     */
+    @Override
+    public String cancelBooking(Integer bookingId, String passengerEmail) {
+        // Vérifier si la réservation existe et appartient au passager
+        RouteBooking booking = routeBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable"));
+
+        if (!booking.getPassenger().getEmail().equals(passengerEmail)) {
+            throw new IllegalStateException("Cette réservation n'appartient pas à l'utilisateur.");
+        }
+
+        if ("cancelled".equals(booking.getStatus())) {
+            return "La réservation a déjà été annulée.";
+        }
+
+        // Modifier le statut de la réservation
+        booking.setStatus("cancelled");
+        routeBookingRepository.save(booking);
+
+        return "Réservation annulée avec succès.";
+    }
+
+    /**
+     * Récupérer les réservations annulées d'un passager.
+     */
+    @Override
+    public List<RouteBooking> getCancelledBookings(String passengerEmail) {
+        return routeBookingRepository.findByPassengerEmailAndStatus(passengerEmail, "cancelled");
+    }
 }

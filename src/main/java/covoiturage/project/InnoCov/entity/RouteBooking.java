@@ -30,4 +30,7 @@ public class RouteBooking {
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date bookingDate = new Date();
+
+    @Column(nullable = false)
+    private String status = "default";
 }

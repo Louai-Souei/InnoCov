@@ -9,6 +9,7 @@ import covoiturage.project.InnoCov.repository.RouteRepository;
 import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteService;
 import covoiturage.project.InnoCov.util.ApiResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,7 @@ public class RouteServiceImpl implements RouteService {
         try {
             List<Route> routes = routeRepository.findByDriverEmail(email);
             if (routes.isEmpty()) {
-                return ResponseEntity.ok(List.of()); // Renvoie une liste vide si aucun résultat
+                return ResponseEntity.ok(List.of());
             }
 
             List<RouteDto> routeDtos = routes.stream()
@@ -79,5 +80,28 @@ public class RouteServiceImpl implements RouteService {
         }
     }
 
+    @Override
+    public RouteDto updateRoute(Integer id, RouteDto routeDto) {
+        Route route = routeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Route with ID " + id + " not found"));
 
+        if (routeDto.getDeparture() != null) route.setDeparture(routeDto.getDeparture());
+        if (routeDto.getArrival() != null) route.setArrival(routeDto.getArrival());
+        if (routeDto.getDepartureDate() != null) route.setDepartureDate(routeDto.getDepartureDate());
+        if (routeDto.getNumberOfPassengers() > 0) route.setNumberOfPassengers(routeDto.getNumberOfPassengers());
+        if (routeDto.getDriver() != null) route.setDriver(routeDto.getDriver().convert());
+
+        Route updatedRoute = routeRepository.save(route);
+
+        return new RouteDto(updatedRoute);
+    }
+
+    @Override
+    public boolean deleteRouteById(Integer id) {
+        if (routeRepository.existsById(id)) {
+            routeRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }

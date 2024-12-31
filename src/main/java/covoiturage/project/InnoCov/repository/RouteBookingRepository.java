@@ -11,4 +11,7 @@ public interface RouteBookingRepository extends JpaRepository<RouteBooking, Inte
     int countByRoute(Route route);
 
     List<RouteBooking> findByRoute(Route route);
+    List<RouteBooking> findByPassengerEmail(String email);
+    List<RouteBooking> findByPassengerEmailAndStatus(String email, String status);
+
 }

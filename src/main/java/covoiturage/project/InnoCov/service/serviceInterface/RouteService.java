@@ -12,5 +12,7 @@ public interface RouteService {
 
     ResponseEntity<RouteDto> getAllRouteInformation(Integer routeId);
     ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(String email);
+    RouteDto updateRoute(Integer id, RouteDto routeDto);
+    boolean deleteRouteById(Integer id);
 
 }
