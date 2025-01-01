@@ -12,7 +12,7 @@ public interface RouteService {
 
     ResponseEntity<RouteDto> getAllRouteInformation(Integer routeId);
 
-    ResponseEntity<List<RouteDto>> getAvailableRoutes();
+    ResponseEntity<List<RouteDto>> getAvailableRoutes(String date);
 
 
 }

@@ -1,6 +1,7 @@
 package covoiturage.project.InnoCov.dto;
 
 import covoiturage.project.InnoCov.entity.Complaint;
+import covoiturage.project.InnoCov.entity.enums.ComplaintType;
 import covoiturage.project.InnoCov.tools.Convertible;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class ComplaintDto implements Convertible<Complaint> {
     private Date createdAt;
     private UserDto complainer;
     private UserDto targetUser;
+    private ComplaintType complaintType;
     private boolean resolved;
 
     public ComplaintDto(Complaint complaint) {
@@ -25,6 +27,7 @@ public class ComplaintDto implements Convertible<Complaint> {
         this.createdAt = complaint.getCreatedAt();
         this.complainer = new UserDto(complaint.getComplainer());
         this.targetUser = new UserDto(complaint.getTargetUser());
+        this.complaintType = complaint.getComplaintType();
         this.resolved = complaint.isResolved();
     }
 
@@ -34,6 +37,7 @@ public class ComplaintDto implements Convertible<Complaint> {
         complaint.setId(id);
         complaint.setDescription(description);
         complaint.setCreatedAt(createdAt);
+        complaint.setComplaintType(complaintType);
         if (this.complainer != null) {
             complaint.setComplainer(this.complainer.convert());
         }

@@ -1,5 +1,6 @@
 package covoiturage.project.InnoCov.entity;
 
+import covoiturage.project.InnoCov.entity.enums.ComplaintType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +34,10 @@ public class Complaint {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_user_id", nullable = false)
     private User targetUser;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private ComplaintType complaintType;
 
     @Column(nullable = false)
     private boolean resolved = false;

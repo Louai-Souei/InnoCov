@@ -15,7 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +31,6 @@ public class RouteServiceImpl implements RouteService {
     private final RouteRepository routeRepository;
     private final AuthenticationServiceImpl authenticationService;
     private final RouteBookingRepository routeBookingRepository;
-
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -61,9 +65,20 @@ public class RouteServiceImpl implements RouteService {
 
     @Transactional
     @Override
-    public ResponseEntity<List<RouteDto>> getAvailableRoutes() {
+    public ResponseEntity<List<RouteDto>> getAvailableRoutes(String date) {
         try {
-            List<Route> routes = routeRepository.findAvailableRoutesWithCapacity();
+            List<Route> routes;
+            if (date != null) {
+                LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy", Locale.ENGLISH));
+
+                Date startOfDay = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date endOfDay = Date.from(localDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                routes = routeRepository.findAvailableRoutesByDate(startOfDay, endOfDay);
+            } else {
+                routes = routeRepository.findAvailableRoutesWithCapacity();
+            }
+
             List<RouteDto> routeDtos = routes.stream()
                     .map(route -> new RouteDto(
                             route,
@@ -78,6 +93,5 @@ public class RouteServiceImpl implements RouteService {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
 
 }
