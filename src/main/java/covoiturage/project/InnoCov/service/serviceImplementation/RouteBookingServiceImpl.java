@@ -131,4 +131,37 @@ public class RouteBookingServiceImpl implements RouteBookingService {
     public List<RouteBooking> getCancelledBookings(String passengerEmail) {
         return routeBookingRepository.findByPassengerEmailAndStatus(passengerEmail, "cancelled");
     }
+
+
+    public List<RouteBooking> getBookingsByDriverEmail(String email) {
+        return routeBookingRepository.findByDriverEmail(email);
+    }
+    @Override
+    public RouteBooking acceptBooking(Integer bookingId) {
+        RouteBooking booking = routeBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found with ID: " + bookingId));
+        booking.setStatus("accepted");
+        return routeBookingRepository.save(booking);
+    }
+
+    @Override
+    public RouteBooking rejectBooking(Integer bookingId) {
+        RouteBooking booking = routeBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found with ID: " + bookingId));
+        booking.setStatus("rejected");
+        return routeBookingRepository.save(booking);
+    }
+
+    @Override
+    public List<RouteBooking> getBookingsByRoute(Route route) {
+        return routeBookingRepository.findAll();
+    }
+
+    @Override
+    public void updateBookingStatus(Integer bookingId, String status) {
+        RouteBooking booking = routeBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+        booking.setStatus(status);
+        routeBookingRepository.save(booking);
+    }
 }

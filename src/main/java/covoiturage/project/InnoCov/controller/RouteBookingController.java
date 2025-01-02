@@ -1,6 +1,7 @@
 package covoiturage.project.InnoCov.controller;
 
 import covoiturage.project.InnoCov.dto.RouteBookingDto;
+import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteBookingService;
 import covoiturage.project.InnoCov.util.ApiResponse;
@@ -52,5 +53,30 @@ public class RouteBookingController {
             @RequestParam String passengerEmail) {
         List<RouteBooking> bookings = routeBookingService.getCancelledBookings(passengerEmail);
         return ResponseEntity.ok(bookings);
+    }
+
+
+    @GetMapping("/driver/{email}")
+    public ResponseEntity<List<RouteBooking>> getBookingsByDriverEmail(@PathVariable String email) {
+        List<RouteBooking> bookings = routeBookingService.getBookingsByDriverEmail(email);
+        return ResponseEntity.ok(bookings);
+    }
+    @GetMapping("/by-route/{routeId}")
+    public List<RouteBooking> getBookingsByRoute(@PathVariable Integer routeId) {
+        Route route = new Route();
+        route.setId(routeId);
+        return routeBookingService.getBookingsByRoute(route);
+    }
+
+    @PutMapping("/{bookingId}/accept")
+    public ResponseEntity<Void> acceptBooking(@PathVariable Integer bookingId) {
+        routeBookingService.updateBookingStatus(bookingId, "accepted");
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{bookingId}/reject")
+    public ResponseEntity<Void> rejectBooking(@PathVariable Integer bookingId) {
+        routeBookingService.updateBookingStatus(bookingId, "rejected");
+        return ResponseEntity.ok().build();
     }
 }

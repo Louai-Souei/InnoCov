@@ -29,7 +29,7 @@ public class Route {
 
     private int numberOfPassengers;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.MERGE)
     @JoinColumn(name = "driver_id", nullable = false)
     private User driver;
 

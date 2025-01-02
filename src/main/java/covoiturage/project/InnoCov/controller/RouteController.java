@@ -30,7 +30,7 @@ public class RouteController {
     public ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(@PathVariable String email) {
         return routeService.getRoutesByDriverEmail(email);
     }
-    @PutMapping("/{id}")
+    @PutMapping("/updateRoute/{id}")
     public ResponseEntity<RouteDto> updateRoute(@PathVariable Integer id, @RequestBody RouteDto routeDto) {
         RouteDto updatedRoute = routeService.updateRoute(id, routeDto);
         return ResponseEntity.ok(updatedRoute);

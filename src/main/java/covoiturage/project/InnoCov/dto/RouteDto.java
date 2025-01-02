@@ -29,6 +29,7 @@ public class RouteDto implements Convertible<Route> {
         this.departure = route.getDeparture();
         this.arrival = route.getArrival();
         this.departureDate = route.getDepartureDate();
+        this.numberOfPassengers = route.getNumberOfPassengers();
         this.driver = new UserDto(route.getDriver());
     }
 
@@ -37,6 +38,8 @@ public class RouteDto implements Convertible<Route> {
         this.departure = route.getDeparture();
         this.arrival = route.getArrival();
         this.departureDate = route.getDepartureDate();
+        this.numberOfPassengers = route.getNumberOfPassengers();
+
         this.createdAt = route.getCreatedAt();
         this.driver = new UserDto(route.getDriver());
         this.passengers = passengers.stream().map(UserDto::new).collect(Collectors.toList());

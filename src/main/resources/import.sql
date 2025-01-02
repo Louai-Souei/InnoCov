@@ -31,13 +31,32 @@ INSERT INTO complaint (id, description, created_at, complainer_id, target_user_i
 
 
 -- Insérer des réservations de routes
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (1, 2, 1, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (2, 3, 1, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (3, 4, 2, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (4, 5, 2, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (5, 6, 3, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (6, 7, 3, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (7, 8, 4, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (8, 9, 4, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (9, 10, 5, CURRENT_TIMESTAMP);
-INSERT INTO route_booking (id, passenger_id, route_id, booking_date) VALUES (10, 1, 5, CURRENT_TIMESTAMP);
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (1, 2, 1, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (2, 3, 1, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (3, 4, 2, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (4, 5, 2, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (5, 6, 3, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (6, 7, 3, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (7, 8, 4, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (8, 9, 4, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (9, 10, 5, CURRENT_TIMESTAMP);
+
+INSERT INTO route_booking (id, passenger_id, route_id, booking_date)
+VALUES (10, 1, 5, CURRENT_TIMESTAMP);

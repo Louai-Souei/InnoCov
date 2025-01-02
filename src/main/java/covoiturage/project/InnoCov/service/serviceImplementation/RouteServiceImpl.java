@@ -6,6 +6,7 @@ import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.repository.RouteBookingRepository;
 import covoiturage.project.InnoCov.repository.RouteRepository;
+import covoiturage.project.InnoCov.repository.UserRepository;
 import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteService;
 import covoiturage.project.InnoCov.util.ApiResponse;
@@ -65,6 +66,7 @@ public class RouteServiceImpl implements RouteService {
     public ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(String email) {
         try {
             List<Route> routes = routeRepository.findByDriverEmail(email);
+
             if (routes.isEmpty()) {
                 return ResponseEntity.ok(List.of());
             }
@@ -82,6 +84,7 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public RouteDto updateRoute(Integer id, RouteDto routeDto) {
+        log.info("Updating route: {}", id.toString());
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Route with ID " + id + " not found"));
 
@@ -89,12 +92,13 @@ public class RouteServiceImpl implements RouteService {
         if (routeDto.getArrival() != null) route.setArrival(routeDto.getArrival());
         if (routeDto.getDepartureDate() != null) route.setDepartureDate(routeDto.getDepartureDate());
         if (routeDto.getNumberOfPassengers() > 0) route.setNumberOfPassengers(routeDto.getNumberOfPassengers());
-        if (routeDto.getDriver() != null) route.setDriver(routeDto.getDriver().convert());
+
+      
 
         Route updatedRoute = routeRepository.save(route);
-
         return new RouteDto(updatedRoute);
     }
+
 
     @Override
     public boolean deleteRouteById(Integer id) {

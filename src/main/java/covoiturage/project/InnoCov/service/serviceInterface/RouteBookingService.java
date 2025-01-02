@@ -1,6 +1,7 @@
 package covoiturage.project.InnoCov.service.serviceInterface;
 
 import covoiturage.project.InnoCov.dto.RouteBookingDto;
+import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
@@ -18,5 +19,10 @@ public interface RouteBookingService {
    String cancelBooking(Integer bookingId, String passengerEmail);
 
 
+   List<RouteBooking> getBookingsByDriverEmail(String passengerEmail);
    List<RouteBooking> getCancelledBookings(String passengerEmail);
+   RouteBooking acceptBooking(Integer bookingId);
+   RouteBooking rejectBooking(Integer bookingId);
+   List<RouteBooking> getBookingsByRoute(Route route) ;
+   void updateBookingStatus(Integer bookingId, String status);
 }
