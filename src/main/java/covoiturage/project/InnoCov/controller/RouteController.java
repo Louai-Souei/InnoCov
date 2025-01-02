@@ -26,6 +26,10 @@ public class RouteController {
     public ResponseEntity<RouteDto> getAllRouteInformations(@PathVariable Integer routeId) {
         return routeService.getAllRouteInformation(routeId);
     }
+    @GetMapping("/driver-routes/{email}")
+    public ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(@PathVariable String email) {
+        return routeService.getRoutesByDriverEmail(email);
+    }
 
     @GetMapping("/available")
     public ResponseEntity<List<RouteDto>> getAvailableRoutes(@RequestParam(
