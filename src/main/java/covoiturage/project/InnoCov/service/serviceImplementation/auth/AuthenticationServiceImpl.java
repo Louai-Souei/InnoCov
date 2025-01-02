@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -49,7 +50,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthenticationResponse register (RegisterRequest registerRequest){
+    public AuthenticationResponse register (RegisterRequest registerRequest, MultipartFile image) throws IOException {
         var user = User.builder()
                 .firstname(registerRequest.getFirstname())
                 .lastname(registerRequest.getLastname())
@@ -58,6 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(registerRequest.getRole())
                 .occupation(registerRequest.getOccupation())
+                .userImage(image.getBytes())
                 .build();
         var savedUser = userRepository.save(user);
         var jwtToken = jwtServiceImpl.generateToken(user);

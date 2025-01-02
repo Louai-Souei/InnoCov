@@ -45,6 +45,10 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Occupation occupation;
 
+    @Lob
+    @Column(length = 1000000)
+    private byte[] userImage;
+
     @OneToMany(mappedBy = "complainer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Complaint> complaintsMade = new ArrayList<>();
 

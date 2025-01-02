@@ -5,7 +5,11 @@ import covoiturage.project.InnoCov.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService {
+
     ResponseEntity<ApiResponse<UserDto>> getActiveUser();
+
     ResponseEntity<ApiResponse<UserDto>> getUserById(Integer userId);
+
     ResponseEntity<ApiResponse<UserDto>> updateUserProfile(Integer userId, UserDto userDto);
+
 }
