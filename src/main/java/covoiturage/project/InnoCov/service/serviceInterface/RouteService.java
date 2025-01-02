@@ -11,7 +11,6 @@ public interface RouteService {
     ResponseEntity<ApiResponse<String>> addRoute(RouteDto route);
 
     ResponseEntity<RouteDto> getAllRouteInformation(Integer routeId);
-    ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(String email);
 
     ResponseEntity<List<RouteDto>> getAvailableRoutes(String date);
 
