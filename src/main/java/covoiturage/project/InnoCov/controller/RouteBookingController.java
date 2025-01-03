@@ -62,7 +62,7 @@ public class RouteBookingController {
         return ResponseEntity.ok(bookings);
     }
     @GetMapping("/by-route/{routeId}")
-    public List<RouteBooking> getBookingsByRoute(@PathVariable Integer routeId) {
+    public List<RouteBookingDto> getBookingsByRoute(@PathVariable Integer routeId) {
         Route route = new Route();
         route.setId(routeId);
         return routeBookingService.getBookingsByRoute(route);

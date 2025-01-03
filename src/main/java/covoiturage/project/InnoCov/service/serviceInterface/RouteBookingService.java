@@ -23,6 +23,6 @@ public interface RouteBookingService {
    List<RouteBooking> getCancelledBookings(String passengerEmail);
    RouteBooking acceptBooking(Integer bookingId);
    RouteBooking rejectBooking(Integer bookingId);
-   List<RouteBooking> getBookingsByRoute(Route route) ;
+   List<RouteBookingDto> getBookingsByRoute(Route route) ;
    void updateBookingStatus(Integer bookingId, String status);
 }

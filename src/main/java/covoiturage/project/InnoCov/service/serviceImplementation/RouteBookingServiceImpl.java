@@ -153,8 +153,10 @@ public class RouteBookingServiceImpl implements RouteBookingService {
     }
 
     @Override
-    public List<RouteBooking> getBookingsByRoute(Route route) {
-        return routeBookingRepository.findAll();
+    public List<RouteBookingDto> getBookingsByRoute(Route route) {
+        return routeBookingRepository.findAll().stream()
+                .map(RouteBookingDto::new)
+                .toList();
     }
 
     @Override
