@@ -30,7 +30,8 @@ import static covoiturage.project.InnoCov.entity.enums.Role.ADMIN;
 
 public class SecurityConfiguration {
 
-    public static final String WHITE_LIST_URL = "/auth/**";
+    //    public static final String[] WHITE_LIST_URL = { "/auth/**", "/route/**", "/**" };
+    public static final String[] WHITE_LIST_URL = {"/auth/**"};
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
@@ -42,7 +43,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
-//                              .requestMatchers("/complaint/**").hasAnyRole(ADMIN.name())
+                                .requestMatchers("/user/get-all").hasAnyRole(ADMIN.name())
 //                              .requestMatchers(HttpMethod.GET, "/task/load/all").hasAnyAuthority(ADMIN_READ.name())
                                 .anyRequest().authenticated()
                 )

@@ -6,7 +6,10 @@ import covoiturage.project.InnoCov.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -46,6 +49,18 @@ public class UserController {
         } catch (Exception e) {
             log.error("Error while updating user profile: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to update profile."));
+        }
+    }
+
+    @GetMapping("/get-all")
+//    @Secured("ROLE_ADMIN")
+    public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
+        try {
+            log.info("Fetching all users ...");
+            return userService.getAllUsers();
+        } catch (Exception e) {
+            log.error("Error while fetching users ", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to fetch all users."));
         }
     }
 }

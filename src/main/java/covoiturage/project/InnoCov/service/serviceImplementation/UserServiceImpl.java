@@ -1,5 +1,6 @@
 package covoiturage.project.InnoCov.service.serviceImplementation;
 
+import covoiturage.project.InnoCov.dto.ComplaintDto;
 import covoiturage.project.InnoCov.dto.UserDto;
 import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.repository.UserRepository;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -78,6 +80,28 @@ public class UserServiceImpl implements UserService {
             log.error("Error updating user profile for ID {}: {}", userId, e.getMessage(), e);
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(false, "Failed to update user profile."));
+        }
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    @Override
+    public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
+        try {
+            List<User> users = userRepository.findAll();
+            if (users.isEmpty()) {
+                log.warn("No User found");
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "No User found."));
+            }
+            List<UserDto> usersDto = users.stream()
+                    .map(UserDto::new)
+                    .toList();
+            log.info("Fetched all users ");
+            return ResponseEntity.ok(new ApiResponse<>(true, "User fetched successfully.", usersDto));
+        } catch (Exception e) {
+            log.error("Error fetching users" , e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, "Failed to fetch all users."));
         }
     }
 }
