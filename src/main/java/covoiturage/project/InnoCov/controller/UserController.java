@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -48,4 +50,20 @@ public class UserController {
             return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to update profile."));
         }
     }
+
+    @GetMapping("/creation-stats")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getUserCreationStatsForLast4Weeks() {
+        try {
+            log.info("Fetching user creation stats for the last 4 weeks");
+            Map<String, Long> stats = userService.getUserCreationStatsForLast4Weeks();
+            return ResponseEntity.ok(new ApiResponse<>(true, "User creation stats fetched successfully.", stats));
+        } catch (Exception e) {
+            log.error("Error fetching user creation stats: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to fetch user creation stats."));
+        }
+    }
+
+
+
+
 }

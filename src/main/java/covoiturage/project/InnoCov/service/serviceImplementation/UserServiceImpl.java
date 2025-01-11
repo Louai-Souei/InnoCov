@@ -3,16 +3,22 @@ package covoiturage.project.InnoCov.service.serviceImplementation;
 import covoiturage.project.InnoCov.dto.UserDto;
 import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.repository.UserRepository;
+import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
 import covoiturage.project.InnoCov.service.serviceInterface.UserService;
 import covoiturage.project.InnoCov.util.ApiResponse;
-import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 @Service
 @RequiredArgsConstructor
@@ -80,4 +86,43 @@ public class UserServiceImpl implements UserService {
                     .body(new ApiResponse<>(false, "Failed to update user profile."));
         }
     }
+
+    @Transactional
+    @Override
+    public Map<String, Long> getUserCreationStatsForLast4Weeks() {
+        try {
+            LocalDateTime weekEnd;
+            LocalDateTime startDate = LocalDate.now().minusWeeks(4).atStartOfDay();
+            LocalDateTime endDate = LocalDate.now().plusDays(1).atStartOfDay();
+
+            List<User> users = userRepository.findAllByCreatedAtBetween(startDate, endDate);
+
+            Map<String, Long> userStats = new TreeMap<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            for (int i = 0; i < 4; i++) {
+                LocalDateTime weekStart = startDate.plusWeeks(i);
+                if (i == 3) {
+                    weekEnd = weekStart.plusDays(7).withHour(23).withMinute(59).withSecond(59);
+                } else {
+                    weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+                }
+
+                LocalDateTime finalWeekEnd = weekEnd;
+                long count = users.stream()
+                        .filter(user -> !user.getCreatedAt().isBefore(weekStart) && !user.getCreatedAt().isAfter(finalWeekEnd))
+                        .count();
+
+                String dateRangeKey = weekStart.format(formatter) + " To " + weekEnd.format(formatter);
+                userStats.put(dateRangeKey, count);
+            }
+
+            log.info("User creation stats for the last 4 weeks: {}", userStats);
+            return userStats;
+        } catch (Exception e) {
+            log.error("Error fetching user creation stats: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch user creation stats.");
+        }
+    }
+
 }
