@@ -13,8 +13,8 @@ import covoiturage.project.InnoCov.tools.tokenTools.TokenType;
 import covoiturage.project.InnoCov.util.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -36,18 +37,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
 
-    @Autowired
-    public AuthenticationServiceImpl(UserRepository userRepository,
-                                     PasswordEncoder passwordEncoder,
-                                     JwtServiceImpl jwtServiceImpl,
-                                     AuthenticationManager authenticationManager,
-                                     TokenRepository tokenRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtServiceImpl = jwtServiceImpl;
-        this.authenticationManager = authenticationManager;
-        this.tokenRepository = tokenRepository;
-    }
 
     @Override
     public AuthenticationResponse register (RegisterRequest registerRequest, MultipartFile image) throws IOException {
@@ -67,6 +56,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     }
 
+    @Override
+    public AuthenticationResponse login (AuthenticationRequest authenticationRequest){
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        authenticationRequest.getEmail(),
+                        authenticationRequest.getPassword()
+                )
+        );
+        var user = userRepository.findByEmail(
+                        authenticationRequest.getEmail())
+                .orElseThrow();
+        var jwtToken = jwtServiceImpl.generateToken(user);
+        revokeAllUserTokens(user);
+        return getAuthenticationResponse(user, user, jwtToken);
+    }
+
     private AuthenticationResponse getAuthenticationResponse(
             User user, User savedUser, String jwtToken
     ) {
@@ -81,23 +86,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(user.getEmail())
                 .occupation(user.getOccupation().name())
                 .build();
-    }
-
-
-    @Override
-    public AuthenticationResponse login (AuthenticationRequest authenticationRequest){
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.getEmail(),
-                        authenticationRequest.getPassword()
-                )
-        );
-        var user = userRepository.findByEmail(
-                authenticationRequest.getEmail())
-                .orElseThrow();
-        var jwtToken = jwtServiceImpl.generateToken(user);
-        revokeAllUserTokens(user);
-        return getAuthenticationResponse(user, user, jwtToken);
     }
 
     public void refreshToken(
