@@ -84,15 +84,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse login (AuthenticationRequest authenticationRequest){
+
+
+        var user = userRepository.findByEmail(
+                        authenticationRequest.getEmail())
+                .orElseThrow();
+
+        if (!user.isStatus()) { 
+            throw new RuntimeException("Vous êtes bloqué. Contactez l'administrateur.");
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authenticationRequest.getEmail(),
                         authenticationRequest.getPassword()
                 )
         );
-        var user = userRepository.findByEmail(
-                authenticationRequest.getEmail())
-                .orElseThrow();
+
         var jwtToken = jwtServiceImpl.generateToken(user);
         revokeAllUserTokens(user);
         return getAuthenticationResponse(user, user, jwtToken);
