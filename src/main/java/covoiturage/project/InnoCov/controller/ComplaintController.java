@@ -35,4 +35,8 @@ public class ComplaintController {
     public ResponseEntity<ApiResponse<ComplaintDto>> resolveComplaint(@PathVariable Integer complaintId) {
         return complaintService.resolveComplaint(complaintId);
     }
+    @GetMapping("/complaints-grouped-by-target-user")
+    public List<ComplaintDto> getAllComplaintsGroupedByTargetUser() {
+        return complaintService.getAllComplaintsGroupedByTargetUser();
+    }
 }

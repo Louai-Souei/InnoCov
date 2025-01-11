@@ -20,6 +20,10 @@ public class UserDto implements Convertible<User> {
     private Role role;
     private Occupation occupation;
 
+
+
+    private boolean status ;
+
     public UserDto(User user) {
         this.id = user.getId();
         this.firstname = user.getFirstname();
@@ -28,6 +32,8 @@ public class UserDto implements Convertible<User> {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.occupation = user.getOccupation();
+        this.status = user.isStatus();
+
     }
 
     @Override
@@ -39,6 +45,15 @@ public class UserDto implements Convertible<User> {
         user.setEmail(email);
         user.setRole(role);
         user.setOccupation(occupation);
+        user.setStatus(status);
         return user;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }

@@ -82,4 +82,9 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    public List<ComplaintDto> getAllComplaintsGroupedByTargetUser() {
+        return complaintRepository.findAllComplaintsGroupedByTargetUser();
+    }
 }

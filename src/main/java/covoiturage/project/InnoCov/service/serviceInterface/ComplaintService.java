@@ -15,4 +15,7 @@ public interface ComplaintService {
     List<ComplaintDto> getComplaintsByComplainer();
 
     ResponseEntity<ApiResponse<ComplaintDto>> resolveComplaint(Integer complaintId);
+
+    List<ComplaintDto> getAllComplaintsGroupedByTargetUser();
+
 }

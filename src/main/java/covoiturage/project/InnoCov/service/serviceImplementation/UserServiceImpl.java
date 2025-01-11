@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -36,5 +39,29 @@ public class UserServiceImpl  implements UserService {
 
         userRepository.save(user);
         return new UserDto(user);
+    }
+    @Override
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserDto::new) // Convertir chaque User en UserDto
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto activateUser(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(true); // Activer le statut
+        userRepository.save(user);
+        return new UserDto(user); // Retourner le UserDto mis à jour
+    }
+
+    @Override
+    public UserDto deactivateUser(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(false); // Désactiver le statut
+        userRepository.save(user);
+        return new UserDto(user); // Retourner le UserDto mis à jour
     }
 }
