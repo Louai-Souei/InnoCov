@@ -35,12 +35,12 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PatchMapping("/activate/{userId}")
+    @PutMapping("/activate/{userId}")
     public UserDto activateUser(@PathVariable Integer userId) {
         return userService.activateUser(userId);
     }
 
-    @PatchMapping("/deactivate/{userId}")
+    @PutMapping("/deactivate/{userId}")
     public UserDto deactivateUser(@PathVariable Integer userId) {
         return userService.deactivateUser(userId);
     }
