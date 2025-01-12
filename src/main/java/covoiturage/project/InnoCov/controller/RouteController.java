@@ -43,4 +43,13 @@ public class RouteController {
         }
         return ResponseEntity.status(404).body("Route not found with ID: " + id);
     }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<RouteDto>> getAvailableRoutes(@RequestParam(
+            name = "date",
+            required = false) String date
+    ) {
+        return routeService.getAvailableRoutes(date);
+    }
+
 }

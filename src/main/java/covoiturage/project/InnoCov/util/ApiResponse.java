@@ -27,4 +27,11 @@ public class ApiResponse<T> {
         this.title = title;
         this.message = message;
     }
+
+    public ApiResponse(boolean success, String message, T data) {
+        this.success = success;
+        this.message = message;
+        this.data = data;
+    }
+
 }

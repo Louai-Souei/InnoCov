@@ -1,6 +1,7 @@
 package covoiturage.project.InnoCov.service.serviceImplementation;
 
 import covoiturage.project.InnoCov.dto.ComplaintDto;
+import covoiturage.project.InnoCov.dto.UserDto;
 import covoiturage.project.InnoCov.entity.Complaint;
 import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.repository.ComplaintRepository;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +41,6 @@ public class ComplaintServiceImpl implements ComplaintService {
         Complaint savedComplaint = complaintRepository.save(complaint);
 
         ApiResponse<ComplaintDto> response = new ApiResponse<>(
-                "Complaint Added",
                 true,
                 "Complaint has been successfully added",
                 new ComplaintDto(savedComplaint)
@@ -49,7 +51,6 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public List<ComplaintDto> getComplaintsByTargetUser(Integer targetUserId) {
-
         return complaintRepository.findByTargetUserId(targetUserId).stream()
                 .map(ComplaintDto::new)
                 .toList();
@@ -66,7 +67,6 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public ResponseEntity<ApiResponse<ComplaintDto>> resolveComplaint(Integer complaintId) {
-
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
@@ -74,7 +74,6 @@ public class ComplaintServiceImpl implements ComplaintService {
         Complaint updatedComplaint = complaintRepository.save(complaint);
 
         ApiResponse<ComplaintDto> response = new ApiResponse<>(
-                "Complaint Resolved",
                 true,
                 "The complaint has been resolved successfully",
                 new ComplaintDto(updatedComplaint)
@@ -84,7 +83,29 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public List<ComplaintDto> getAllComplaintsGroupedByTargetUser() {
-        return complaintRepository.findAllComplaintsGroupedByTargetUser();
+    public ResponseEntity<List<Map<String, Object>>> getAllComplaintsGroupedByTargetUser() {
+        List<Map<String, Object>> groupedComplaints = complaintRepository.findAllComplaintsOrderedByTargetUser()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        complaint -> new UserDto(complaint.getTargetUser()), // Utilisation d'un DTO pour user
+                        Collectors.mapping(ComplaintDto::new, Collectors.toList()) // Conversion des plaintes en DTO
+                ))
+                .entrySet()
+                .stream()
+                .map(entry -> Map.of(
+                        "user", entry.getKey(),
+                        "complaints", entry.getValue()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(groupedComplaints);
     }
+
+    @Override
+    public List<ComplaintDto> getAllComplaints() {
+        return complaintRepository.findAll().stream()
+                .map(ComplaintDto::new)
+                .toList();
+    }
+
 }

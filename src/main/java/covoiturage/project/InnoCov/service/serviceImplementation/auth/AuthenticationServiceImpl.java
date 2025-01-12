@@ -13,8 +13,8 @@ import covoiturage.project.InnoCov.tools.tokenTools.TokenType;
 import covoiturage.project.InnoCov.util.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,9 +22,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -35,21 +37,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
 
-    @Autowired
-    public AuthenticationServiceImpl(UserRepository userRepository,
-                                     PasswordEncoder passwordEncoder,
-                                     JwtServiceImpl jwtServiceImpl,
-                                     AuthenticationManager authenticationManager,
-                                     TokenRepository tokenRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtServiceImpl = jwtServiceImpl;
-        this.authenticationManager = authenticationManager;
-        this.tokenRepository = tokenRepository;
-    }
 
     @Override
-    public AuthenticationResponse register (RegisterRequest registerRequest){
+    public AuthenticationResponse register (RegisterRequest registerRequest, MultipartFile image) throws IOException {
         var user = User.builder()
                 .firstname(registerRequest.getFirstname())
                 .lastname(registerRequest.getLastname())
@@ -58,11 +48,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(registerRequest.getRole())
                 .occupation(registerRequest.getOccupation())
+                .userImage(image.getBytes())
                 .build();
         var savedUser = userRepository.save(user);
         var jwtToken = jwtServiceImpl.generateToken(user);
         return getAuthenticationResponse(user, savedUser, jwtToken);
 
+    }
+
+    @Override
+    public AuthenticationResponse login (AuthenticationRequest authenticationRequest){
+
+
+        var user = userRepository.findByEmail(
+                        authenticationRequest.getEmail())
+                .orElseThrow();
+
+        if (!user.isStatus()) {
+            throw new RuntimeException("Vous êtes bloqué. Contactez l'administrateur.");
+        }
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        authenticationRequest.getEmail(),
+                        authenticationRequest.getPassword()
+                )
+        );
+        var jwtToken = jwtServiceImpl.generateToken(user);
+        revokeAllUserTokens(user);
+        return getAuthenticationResponse(user, user, jwtToken);
     }
 
     private AuthenticationResponse getAuthenticationResponse(
@@ -81,30 +95,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
     }
 
-
-    @Override
-    public AuthenticationResponse login (AuthenticationRequest authenticationRequest){
-
-
-        var user = userRepository.findByEmail(
-                        authenticationRequest.getEmail())
-                .orElseThrow();
-
-        if (!user.isStatus()) { 
-            throw new RuntimeException("Vous êtes bloqué. Contactez l'administrateur.");
-        }
-
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.getEmail(),
-                        authenticationRequest.getPassword()
-                )
-        );
-
-        var jwtToken = jwtServiceImpl.generateToken(user);
-        revokeAllUserTokens(user);
-        return getAuthenticationResponse(user, user, jwtToken);
-    }
 
     public void refreshToken(
             HttpServletRequest request,

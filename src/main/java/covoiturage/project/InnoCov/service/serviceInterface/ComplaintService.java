@@ -5,6 +5,7 @@ import covoiturage.project.InnoCov.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ComplaintService {
 
@@ -16,6 +17,7 @@ public interface ComplaintService {
 
     ResponseEntity<ApiResponse<ComplaintDto>> resolveComplaint(Integer complaintId);
 
-    List<ComplaintDto> getAllComplaintsGroupedByTargetUser();
+    ResponseEntity<List<Map<String, Object>>> getAllComplaintsGroupedByTargetUser();
 
+    List<ComplaintDto> getAllComplaints();
 }

@@ -4,9 +4,7 @@ import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.entity.enums.Occupation;
 import covoiturage.project.InnoCov.entity.enums.Role;
 import covoiturage.project.InnoCov.tools.Convertible;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -19,9 +17,9 @@ public class UserDto implements Convertible<User> {
     private String email;
     private Role role;
     private Occupation occupation;
-
-
-
+    private byte[] userImage;
+    @Setter
+    @Getter
     private boolean status ;
 
     public UserDto(User user) {
@@ -32,6 +30,7 @@ public class UserDto implements Convertible<User> {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.occupation = user.getOccupation();
+        this.userImage = user.getUserImage();
         this.status = user.isStatus();
 
     }
@@ -49,11 +48,4 @@ public class UserDto implements Convertible<User> {
         return user;
     }
 
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
 }

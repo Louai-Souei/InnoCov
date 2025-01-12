@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/complaint")
@@ -19,6 +20,11 @@ public class ComplaintController {
     @PostMapping("/new-complaint")
     public ResponseEntity<ApiResponse<ComplaintDto>> addComplaint(@RequestBody ComplaintDto complaintDto) {
         return complaintService.addComplaint(complaintDto);
+    }
+
+    @GetMapping("/all-complaints")
+    public List<ComplaintDto> getAllComplaints() {
+        return complaintService.getAllComplaints();
     }
 
     @GetMapping("/complaints-by-target/{targetUserId}")
@@ -36,7 +42,8 @@ public class ComplaintController {
         return complaintService.resolveComplaint(complaintId);
     }
     @GetMapping("/complaints-grouped-by-target-user")
-    public List<ComplaintDto> getAllComplaintsGroupedByTargetUser() {
+    public ResponseEntity<List<Map<String, Object>>> getAllComplaintsGroupedByTargetUser() {
         return complaintService.getAllComplaintsGroupedByTargetUser();
     }
+
 }

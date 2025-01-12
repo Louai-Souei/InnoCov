@@ -1,6 +1,7 @@
 package covoiturage.project.InnoCov.service.serviceInterface;
 
 import covoiturage.project.InnoCov.dto.RouteBookingDto;
+import covoiturage.project.InnoCov.dto.RouteDto;
 import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.util.ApiResponse;
@@ -25,4 +26,6 @@ public interface RouteBookingService {
    RouteBooking rejectBooking(Integer bookingId);
    List<RouteBookingDto> getBookingsByRoute(Route route) ;
    void updateBookingStatus(Integer bookingId, String status);
+
+   ResponseEntity<ApiResponse<List<RouteDto>>> getAllBookedRoutesByActiveUser();
 }

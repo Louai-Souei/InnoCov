@@ -6,7 +6,6 @@ import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.repository.RouteBookingRepository;
 import covoiturage.project.InnoCov.repository.RouteRepository;
-import covoiturage.project.InnoCov.repository.UserRepository;
 import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteService;
 import covoiturage.project.InnoCov.util.ApiResponse;
@@ -17,7 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +32,6 @@ public class RouteServiceImpl implements RouteService {
     private final RouteRepository routeRepository;
     private final AuthenticationServiceImpl authenticationService;
     private final RouteBookingRepository routeBookingRepository;
-
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -51,7 +54,7 @@ public class RouteServiceImpl implements RouteService {
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> new IllegalArgumentException("Route not found"));
 
-        List<User> passengers = routeBookingRepository.findByRoute(route)
+        List<User> passengers = routeBookingRepository.findAcceptedByRoute(route)
                 .stream()
                 .map(RouteBooking::getPassenger)
                 .collect(Collectors.toList());
@@ -72,7 +75,16 @@ public class RouteServiceImpl implements RouteService {
             }
 
             List<RouteDto> routeDtos = routes.stream()
-                    .map(route -> new RouteDto(route))
+                    .map(route -> {
+                        // Récupérer les passagers pour chaque route
+                        List<User> passengers = routeBookingRepository.findAcceptedByRoute(route)
+                                .stream()
+                                .map(RouteBooking::getPassenger)
+                                .collect(Collectors.toList());
+
+                        // Créer le RouteDto avec les passagers
+                        return new RouteDto(route, passengers);
+                    })
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(routeDtos);
@@ -81,6 +93,7 @@ public class RouteServiceImpl implements RouteService {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
 
     @Override
     public RouteDto updateRoute(Integer id, RouteDto routeDto) {
@@ -93,7 +106,7 @@ public class RouteServiceImpl implements RouteService {
         if (routeDto.getDepartureDate() != null) route.setDepartureDate(routeDto.getDepartureDate());
         if (routeDto.getNumberOfPassengers() > 0) route.setNumberOfPassengers(routeDto.getNumberOfPassengers());
 
-      
+
 
         Route updatedRoute = routeRepository.save(route);
         return new RouteDto(updatedRoute);
@@ -108,4 +121,37 @@ public class RouteServiceImpl implements RouteService {
         }
         return false;
     }
+
+    @Transactional
+    @Override
+    public ResponseEntity<List<RouteDto>> getAvailableRoutes(String date) {
+        try {
+            List<Route> routes;
+            if (date != null) {
+                LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy", Locale.ENGLISH));
+
+                Date startOfDay = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date endOfDay = Date.from(localDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                routes = routeRepository.findAvailableRoutesByDate(startOfDay, endOfDay);
+            } else {
+                routes = routeRepository.findAvailableRoutesWithCapacity();
+            }
+
+            List<RouteDto> routeDtos = routes.stream()
+                    .map(route -> new RouteDto(
+                            route,
+                            route.getBookings().stream()
+                                    .map(RouteBooking::getPassenger)
+                                    .collect(Collectors.toList())))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(routeDtos);
+        } catch (Exception e) {
+            log.error("Error while fetching available routes: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+
 }

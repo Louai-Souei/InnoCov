@@ -15,4 +15,7 @@ public interface RouteService {
     RouteDto updateRoute(Integer id, RouteDto routeDto);
     boolean deleteRouteById(Integer id);
 
+    ResponseEntity<List<RouteDto>> getAvailableRoutes(String date);
+
+
 }

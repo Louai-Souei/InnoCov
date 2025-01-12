@@ -2,6 +2,7 @@ package covoiturage.project.InnoCov.repository;
 
 import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
+import covoiturage.project.InnoCov.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,14 +16,28 @@ public interface RouteBookingRepository extends JpaRepository<RouteBooking, Inte
     List<RouteBooking> findAll();
 
     List<RouteBooking> findByRoute(Route route);
+
+    @Query("""
+            SELECT rb FROM RouteBooking rb
+            WHERE rb.route = :route
+            AND rb.status = "accepted"
+            """)
+    List<RouteBooking> findAcceptedByRoute(Route route);
+
     List<RouteBooking> findByPassengerEmail(String email);
+
     List<RouteBooking> findByPassengerEmailAndStatus(String email, String status);
+
     @Query("SELECT rb.id FROM RouteBooking rb " +
             "JOIN rb.route r " +
             "JOIN r.driver d " +
             "WHERE d.email = :email")
     List<RouteBooking> findByDriverEmail(@Param("email") String email);
+
     List<RouteBooking> findByRoute_IdAndStatus(Integer routeId, String status);
 
+
+
+    List<RouteBooking> findByPassenger(User passenger);
 
 }

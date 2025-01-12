@@ -1,6 +1,7 @@
 package covoiturage.project.InnoCov.controller;
 
 import covoiturage.project.InnoCov.dto.RouteBookingDto;
+import covoiturage.project.InnoCov.dto.RouteDto;
 import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteBookingService;
@@ -79,4 +80,10 @@ public class RouteBookingController {
         routeBookingService.updateBookingStatus(bookingId, "rejected");
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/routes-booked")
+    public ResponseEntity<ApiResponse<List<RouteDto>>> getUserBookedRoutes() {
+        return routeBookingService.getAllBookedRoutesByActiveUser();
+    }
+
 }
