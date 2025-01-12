@@ -8,6 +8,7 @@ import covoiturage.project.InnoCov.entity.User;
 import covoiturage.project.InnoCov.repository.RouteBookingRepository;
 import covoiturage.project.InnoCov.repository.RouteRepository;
 import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
+import covoiturage.project.InnoCov.service.serviceInterface.EmailServiceImpl;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteBookingService;
 import covoiturage.project.InnoCov.util.ApiResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,9 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +32,7 @@ public class RouteBookingServiceImpl implements RouteBookingService {
     private final RouteBookingRepository routeBookingRepository;
     private final RouteRepository routeRepository;
     private final AuthenticationServiceImpl authenticationService;
+    private final EmailServiceImpl emailService;
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -121,16 +124,8 @@ public class RouteBookingServiceImpl implements RouteBookingService {
                 .collect(Collectors.toList());
     }
 
-
-
-
-
-    /**
-     * Annuler une réservation par un passager.
-     */
     @Override
     public String cancelBooking(Integer bookingId, String passengerEmail) {
-        // Vérifier si la réservation existe et appartient au passager
         RouteBooking booking = routeBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable"));
 
@@ -142,16 +137,12 @@ public class RouteBookingServiceImpl implements RouteBookingService {
             return "La réservation a déjà été annulée.";
         }
 
-        // Modifier le statut de la réservation
         booking.setStatus("cancelled");
         routeBookingRepository.save(booking);
 
         return "Réservation annulée avec succès.";
     }
 
-    /**
-     * Récupérer les réservations annulées d'un passager.
-     */
     @Override
     public List<RouteBooking> getCancelledBookings(String passengerEmail) {
         return routeBookingRepository.findByPassengerEmailAndStatus(passengerEmail, "cancelled");
@@ -160,21 +151,6 @@ public class RouteBookingServiceImpl implements RouteBookingService {
 
     public List<RouteBooking> getBookingsByDriverEmail(String email) {
         return routeBookingRepository.findByDriverEmail(email);
-    }
-    @Override
-    public RouteBooking acceptBooking(Integer bookingId) {
-        RouteBooking booking = routeBookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Booking not found with ID: " + bookingId));
-        booking.setStatus("accepted");
-        return routeBookingRepository.save(booking);
-    }
-
-    @Override
-    public RouteBooking rejectBooking(Integer bookingId) {
-        RouteBooking booking = routeBookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Booking not found with ID: " + bookingId));
-        booking.setStatus("rejected");
-        return routeBookingRepository.save(booking);
     }
 
     @Override
@@ -190,5 +166,88 @@ public class RouteBookingServiceImpl implements RouteBookingService {
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
         booking.setStatus(status);
         routeBookingRepository.save(booking);
+        if(status.equals("rejected")) {
+            emailService.sendRejectReservationEmail(
+                    booking.getPassenger().getEmail(),
+                    booking.getPassenger().getFirstname(),
+                    booking.getPassenger().getLastname(),
+                    booking.getRoute()
+            );
+        }
+        if(status.equals("accepted")) {
+            emailService.sendAcceptReservationEmail(
+                    booking.getPassenger().getEmail(),
+                    booking.getPassenger().getFirstname(),
+                    booking.getPassenger().getLastname(),
+                    booking.getRoute()
+            );
+        }
     }
+
+    @Transactional
+    @Override
+    public Map<String, Long> getUserCreationStatsForLast4Weeks() {
+        try {
+            LocalDate startDate = LocalDate.now().minusWeeks(4);
+            LocalDate endDate = LocalDate.now().plusDays(1);
+
+            Map<String, Long> routeStats = new TreeMap<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            for (int i = 0; i < 4; i++) {
+                LocalDate weekStart = startDate.plusWeeks(i);
+                LocalDate weekEnd = (i == 3)
+                        ? weekStart.plusDays(7).minusDays(1)
+                        : weekStart.plusDays(6);
+
+                Date start = Date.from(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date end = Date.from(weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+                Long count = routeBookingRepository.countUsersWhoCreatedRoutebookingsBetween(start, end);
+
+                String dateRangeKey = weekStart.format(formatter) + " To " + weekEnd.format(formatter);
+                routeStats.put(dateRangeKey, count);
+            }
+
+            log.info("User creation stats for the last 4 weeks: {}", routeStats);
+            return routeStats;
+        } catch (Exception e) {
+            log.error("Error fetching user creation stats: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch user creation stats.");
+        }
+    }
+
+    @Transactional
+    @Override
+    public Map<String, Long> getRouteBookingsCreatedStatsForLast4Weeks() {
+        try {
+            LocalDate startDate = LocalDate.now().minusWeeks(4);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            Map<String, Long> weeklyStats = new TreeMap<>();
+
+            for (int i = 0; i < 4; i++) {
+                LocalDate weekStart = startDate.plusWeeks(i);
+                LocalDate weekEnd = (i == 3)
+                        ? weekStart.plusDays(7).minusDays(1)
+                        : weekStart.plusDays(6);
+
+                Date start = Date.from(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date end = Date.from(weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+                Long count = routeBookingRepository.countRouteBookingsCreatedBetween(start, end);
+
+                String dateRangeKey = weekStart.format(formatter) + " To " + weekEnd.format(formatter);
+
+                weeklyStats.put(dateRangeKey, count);
+            }
+
+            log.info("Routes created stats for the last 4 weeks: {}", weeklyStats);
+            return weeklyStats;
+        } catch (Exception e) {
+            log.error("Error fetching routes created stats for the last 4 weeks: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch routes created stats.");
+        }
+    }
+
 }

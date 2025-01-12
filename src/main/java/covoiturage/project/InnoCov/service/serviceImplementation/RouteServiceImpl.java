@@ -19,9 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,13 +74,11 @@ public class RouteServiceImpl implements RouteService {
 
             List<RouteDto> routeDtos = routes.stream()
                     .map(route -> {
-                        // Récupérer les passagers pour chaque route
                         List<User> passengers = routeBookingRepository.findAcceptedByRoute(route)
                                 .stream()
                                 .map(RouteBooking::getPassenger)
                                 .collect(Collectors.toList());
 
-                        // Créer le RouteDto avec les passagers
                         return new RouteDto(route, passengers);
                     })
                     .collect(Collectors.toList());
@@ -152,6 +148,72 @@ public class RouteServiceImpl implements RouteService {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @Transactional
+    @Override
+    public Map<String, Long> getUserCreationStatsForLast4Weeks() {
+        try {
+            LocalDate startDate = LocalDate.now().minusWeeks(4);
+            LocalDate endDate = LocalDate.now().plusDays(1);
+
+            Map<String, Long> routeStats = new TreeMap<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            for (int i = 0; i < 4; i++) {
+                LocalDate weekStart = startDate.plusWeeks(i);
+                LocalDate weekEnd = (i == 3)
+                        ? weekStart.plusDays(7).minusDays(1)
+                        : weekStart.plusDays(6);
+
+                Date start = Date.from(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date end = Date.from(weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+                Long count = routeRepository.countUsersWhoCreatedRoutesBetween(start, end);
+
+                String dateRangeKey = weekStart.format(formatter) + " To " + weekEnd.format(formatter);
+                routeStats.put(dateRangeKey, count);
+            }
+
+            log.info("User creation stats for the last 4 weeks: {}", routeStats);
+            return routeStats;
+        } catch (Exception e) {
+            log.error("Error fetching user creation stats: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch user creation stats.");
+        }
+    }
+
+    @Transactional
+    @Override
+    public Map<String, Long> getRoutesCreatedStatsForLast4Weeks() {
+        try {
+            LocalDate startDate = LocalDate.now().minusWeeks(4);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            Map<String, Long> weeklyStats = new TreeMap<>();
+
+            for (int i = 0; i < 4; i++) {
+                LocalDate weekStart = startDate.plusWeeks(i);
+                LocalDate weekEnd = (i == 3)
+                        ? weekStart.plusDays(7).minusDays(1)
+                        : weekStart.plusDays(6);
+
+                Date start = Date.from(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date end = Date.from(weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+                Long count = routeRepository.countRoutesCreatedBetween(start, end);
+                String dateRangeKey = weekStart.format(formatter) + " To " + weekEnd.format(formatter);
+
+                weeklyStats.put(dateRangeKey, count);
+            }
+
+            log.info("Routes created stats for the last 4 weeks: {}", weeklyStats);
+            return weeklyStats;
+        } catch (Exception e) {
+            log.error("Error fetching routes created stats for the last 4 weeks: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch routes created stats.");
+        }
+    }
+
 
 
 }

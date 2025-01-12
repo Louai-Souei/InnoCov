@@ -5,6 +5,7 @@ import covoiturage.project.InnoCov.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface RouteService {
 
@@ -17,5 +18,8 @@ public interface RouteService {
 
     ResponseEntity<List<RouteDto>> getAvailableRoutes(String date);
 
+    Map<String, Long> getUserCreationStatsForLast4Weeks();
+
+    Map<String, Long> getRoutesCreatedStatsForLast4Weeks();
 
 }

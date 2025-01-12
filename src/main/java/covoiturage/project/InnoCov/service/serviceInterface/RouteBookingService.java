@@ -8,6 +8,7 @@ import covoiturage.project.InnoCov.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface RouteBookingService {
 
@@ -22,10 +23,12 @@ public interface RouteBookingService {
 
    List<RouteBooking> getBookingsByDriverEmail(String passengerEmail);
    List<RouteBooking> getCancelledBookings(String passengerEmail);
-   RouteBooking acceptBooking(Integer bookingId);
-   RouteBooking rejectBooking(Integer bookingId);
    List<RouteBookingDto> getBookingsByRoute(Route route) ;
    void updateBookingStatus(Integer bookingId, String status);
 
    ResponseEntity<ApiResponse<List<RouteDto>>> getAllBookedRoutesByActiveUser();
+
+   Map<String, Long> getUserCreationStatsForLast4Weeks();
+
+   Map<String, Long> getRouteBookingsCreatedStatsForLast4Weeks();
 }

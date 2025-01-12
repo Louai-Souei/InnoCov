@@ -3,6 +3,7 @@ package covoiturage.project.InnoCov.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -21,7 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-import static covoiturage.project.InnoCov.entity.enums.Role.ADMIN;
+import static covoiturage.project.InnoCov.entity.enums.Role.*;
 
 @Configuration
 @EnableWebSecurity
@@ -42,8 +43,20 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
-//                              .requestMatchers("/complaint/**").hasAnyRole(ADMIN.name())
-//                              .requestMatchers(HttpMethod.GET, "/task/load/all").hasAnyAuthority(ADMIN_READ.name())
+                                .requestMatchers("/complaint/all-complaints").hasRole(ADMIN.name())
+                                .requestMatchers("/complaint/complaints-by-target/**").hasRole(ADMIN.name())
+                                .requestMatchers("/route-booking/route-bookings-creation-stats").hasRole(ADMIN.name())
+                                .requestMatchers("/route-booking/user-creation-stats").hasRole(ADMIN.name())
+                                .requestMatchers("/route/routes-creation-stats").hasRole(ADMIN.name())
+                                .requestMatchers("/route/user-creation-stats").hasRole(ADMIN.name())
+                                .requestMatchers("/user/activate/**").hasRole(ADMIN.name())
+                                .requestMatchers("/user/deactivate/**").hasRole(ADMIN.name())
+                                .requestMatchers("/route-booking/new-booking/**").hasRole(PASSENGER.name())
+                                .requestMatchers("/api/route/available").hasRole(PASSENGER.name())
+                                .requestMatchers("/route/driver-routes/").hasRole(DRIVER.name())
+                                .requestMatchers(HttpMethod.PUT, "/route-booking/**").hasAnyRole(DRIVER.name(), PASSENGER.name())
+                                .requestMatchers("/complaint/new-complaint").hasAnyRole(PASSENGER.name(), DRIVER.name())
+                                .requestMatchers("/").hasRole(DRIVER.name())
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -55,7 +68,6 @@ public class SecurityConfiguration {
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
                 );
-        ;
 
         return http.build();
     }

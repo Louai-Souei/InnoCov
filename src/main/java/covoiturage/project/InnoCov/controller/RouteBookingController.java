@@ -7,11 +7,14 @@ import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteBookingService;
 import covoiturage.project.InnoCov.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/route-booking")
 @RequiredArgsConstructor
@@ -78,12 +81,37 @@ public class RouteBookingController {
     @PutMapping("/{bookingId}/reject")
     public ResponseEntity<Void> rejectBooking(@PathVariable Integer bookingId) {
         routeBookingService.updateBookingStatus(bookingId, "rejected");
+
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/routes-booked")
     public ResponseEntity<ApiResponse<List<RouteDto>>> getUserBookedRoutes() {
         return routeBookingService.getAllBookedRoutesByActiveUser();
+    }
+
+    @GetMapping("/user-creation-stats")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getUserCreationStatsForLast4Weeks() {
+        try {
+            log.info("Fetching routes created stats for the last 4 weeks");
+            Map<String, Long> stats = routeBookingService.getUserCreationStatsForLast4Weeks();
+            return ResponseEntity.ok(new ApiResponse<>(true, "Active Passengers creation stats fetched successfully.", stats));
+        } catch (Exception e) {
+            log.error("Error fetching routes created stats: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to fetch Active Passengers stats."));
+        }
+    }
+
+    @GetMapping("/route-bookings-creation-stats")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getRoutesCreatedStatsForLast4Weeks() {
+        try {
+            log.info("Fetching routes created stats for the last 4 weeks");
+            Map<String, Long> stats = routeBookingService.getRouteBookingsCreatedStatsForLast4Weeks();
+            return ResponseEntity.ok(new ApiResponse<>(true, "Route bookings creation stats fetched successfully.", stats));
+        } catch (Exception e) {
+            log.error("Error fetching routes created stats: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to fetch Route bookings creation stats."));
+        }
     }
 
 }

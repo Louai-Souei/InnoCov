@@ -17,6 +17,7 @@ public class UserDto implements Convertible<User> {
     private String email;
     private Role role;
     private Occupation occupation;
+    private String password;
     private byte[] userImage;
     @Setter
     @Getter
@@ -33,6 +34,16 @@ public class UserDto implements Convertible<User> {
         this.userImage = user.getUserImage();
         this.status = user.isStatus();
 
+    }
+
+    public UserDto(Integer userId, String firstname, String lastname, String phone, String email, String password, Occupation occupation) {
+        this.id = userId;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.phone = phone;
+        this.email = email;
+        this.password = password;
+        this.occupation = occupation;
     }
 
     @Override

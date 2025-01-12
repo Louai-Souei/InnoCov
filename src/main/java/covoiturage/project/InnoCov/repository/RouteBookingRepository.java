@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 
 public interface RouteBookingRepository extends JpaRepository<RouteBooking, Integer> {
@@ -39,5 +40,15 @@ public interface RouteBookingRepository extends JpaRepository<RouteBooking, Inte
 
 
     List<RouteBooking> findByPassenger(User passenger);
+
+    @Query("SELECT COUNT(DISTINCT rb.passenger) " +
+            "FROM RouteBooking rb " +
+            "WHERE rb.bookingDate BETWEEN :startDate AND :endDate")
+    Long countUsersWhoCreatedRoutebookingsBetween(Date startDate, Date endDate);
+
+    @Query("SELECT COUNT(rb.id) " +
+            "FROM RouteBooking rb " +
+            "WHERE rb.bookingDate BETWEEN :startDate AND :endDate")
+    Long countRouteBookingsCreatedBetween(Date startDate, Date endDate);
 
 }

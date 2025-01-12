@@ -4,11 +4,14 @@ import covoiturage.project.InnoCov.dto.RouteDto;
 import covoiturage.project.InnoCov.service.serviceInterface.RouteService;
 import covoiturage.project.InnoCov.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/route")
 @RequiredArgsConstructor
@@ -51,5 +54,30 @@ public class RouteController {
     ) {
         return routeService.getAvailableRoutes(date);
     }
+
+    @GetMapping("/user-creation-stats")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getUserCreationStatsForLast4Weeks() {
+        try {
+            log.info("Fetching user creation stats for the last 4 weeks");
+            Map<String, Long> stats = routeService.getUserCreationStatsForLast4Weeks();
+            return ResponseEntity.ok(new ApiResponse<>(true, "Active Drivers stats fetched successfully.", stats));
+        } catch (Exception e) {
+            log.error("Error fetching user creation stats: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to fetchActive Driver stats."));
+        }
+    }
+
+    @GetMapping("/routes-creation-stats")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getRoutesCreatedStatsForLast4Weeks() {
+        try {
+            log.info("Fetching routes created stats for the last 4 weeks");
+            Map<String, Long> stats = routeService.getRoutesCreatedStatsForLast4Weeks();
+            return ResponseEntity.ok(new ApiResponse<>(true, "Routes creation stats fetched successfully.", stats));
+        } catch (Exception e) {
+            log.error("Error fetching routes created stats: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Failed to fetch routes creation stats."));
+        }
+    }
+
 
 }

@@ -87,8 +87,8 @@ public class ComplaintServiceImpl implements ComplaintService {
         List<Map<String, Object>> groupedComplaints = complaintRepository.findAllComplaintsOrderedByTargetUser()
                 .stream()
                 .collect(Collectors.groupingBy(
-                        complaint -> new UserDto(complaint.getTargetUser()), // Utilisation d'un DTO pour user
-                        Collectors.mapping(ComplaintDto::new, Collectors.toList()) // Conversion des plaintes en DTO
+                        complaint -> new UserDto(complaint.getTargetUser()),
+                        Collectors.mapping(ComplaintDto::new, Collectors.toList())
                 ))
                 .entrySet()
                 .stream()
