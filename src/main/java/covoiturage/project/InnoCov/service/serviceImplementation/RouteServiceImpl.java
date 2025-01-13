@@ -35,7 +35,15 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public ResponseEntity<ApiResponse<String>> addRoute(RouteDto routeDto) {
         try {
-            Route route = routeDto.convert();
+
+
+            var route = Route.builder()
+                    .arrival(routeDto.getArrival())
+                    .departure(routeDto.getDeparture())
+                    .numberOfPassengers(routeDto.getNumberOfPassengers())
+                    .departureDate(routeDto.getDepartureDate())
+                    .build();
+
             route.setDriver(authenticationService.getActiveUser());
             routeRepository.save(route);
             log.info("Route added successfully: {}", route);
@@ -123,6 +131,7 @@ public class RouteServiceImpl implements RouteService {
     public ResponseEntity<List<RouteDto>> getAvailableRoutes(String date) {
         try {
             List<Route> routes;
+
             if (date != null) {
                 LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("EEE MMM dd yyyy", Locale.ENGLISH));
 
@@ -134,12 +143,17 @@ public class RouteServiceImpl implements RouteService {
                 routes = routeRepository.findAvailableRoutesWithCapacity();
             }
 
+            User activeUser = authenticationService.getActiveUser();
+
             List<RouteDto> routeDtos = routes.stream()
+                    .filter(route -> route.getBookings().stream()
+                            .noneMatch(routeBooking -> routeBooking.getPassenger().equals(activeUser)))
                     .map(route -> new RouteDto(
                             route,
                             route.getBookings().stream()
                                     .map(RouteBooking::getPassenger)
-                                    .collect(Collectors.toList())))
+                                    .collect(Collectors.toList())
+                    ))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(routeDtos);
@@ -148,6 +162,7 @@ public class RouteServiceImpl implements RouteService {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
 
     @Transactional
     @Override

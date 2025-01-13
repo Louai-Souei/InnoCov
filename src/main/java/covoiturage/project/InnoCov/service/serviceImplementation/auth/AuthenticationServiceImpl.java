@@ -10,6 +10,7 @@ import covoiturage.project.InnoCov.service.serviceInterface.auth.AuthenticationS
 import covoiturage.project.InnoCov.tools.tokenTools.Token;
 import covoiturage.project.InnoCov.tools.tokenTools.TokenRepository;
 import covoiturage.project.InnoCov.tools.tokenTools.TokenType;
+import covoiturage.project.InnoCov.util.ApiResponse;
 import covoiturage.project.InnoCov.util.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,7 +40,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public AuthenticationResponse register (RegisterRequest registerRequest, MultipartFile image) throws IOException {
+    public ApiResponse<AuthenticationResponse> register(RegisterRequest registerRequest, MultipartFile image) throws IOException {
+
+        if (userRepository.existsByPhone(registerRequest.getPhone())) {
+            return new ApiResponse<>(
+                    false,
+                    "Duplication Error",
+                    "A user with this phone number already exists.",
+                    null
+            );
+        }
+
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            return new ApiResponse<>(
+                    false,
+                    "Duplication Error",
+                    "A user with this email address already exists.",
+                    null
+            );
+        }
+
+
         var user = User.builder()
                 .firstname(registerRequest.getFirstname())
                 .lastname(registerRequest.getLastname())
@@ -52,20 +73,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
         var savedUser = userRepository.save(user);
         var jwtToken = jwtServiceImpl.generateToken(user);
-        return getAuthenticationResponse(user, savedUser, jwtToken);
-
+        AuthenticationResponse authResponse = getAuthenticationResponse(user, savedUser, jwtToken);
+        return new ApiResponse<>(
+                true,
+                "Registration Successful",
+                "User registered successfully.",
+                authResponse
+        );
     }
 
     @Override
-    public AuthenticationResponse login (AuthenticationRequest authenticationRequest){
-
-
-        var user = userRepository.findByEmail(
-                        authenticationRequest.getEmail())
-                .orElseThrow();
+    public ApiResponse<AuthenticationResponse> login(AuthenticationRequest authenticationRequest) {
+        var user = userRepository.findByEmail(authenticationRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé."));
 
         if (!user.isStatus()) {
-            throw new RuntimeException("Vous êtes bloqué. Contactez l'administrateur.");
+            return new ApiResponse<>(
+                    false,
+                    "Compte bloqué",
+                    "Your account is blocked. contact administrator.",
+                    null
+            );
         }
 
         authenticationManager.authenticate(
@@ -74,10 +102,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         authenticationRequest.getPassword()
                 )
         );
+
         var jwtToken = jwtServiceImpl.generateToken(user);
         revokeAllUserTokens(user);
-        return getAuthenticationResponse(user, user, jwtToken);
+
+        var authenticationResponse = getAuthenticationResponse(user, user, jwtToken);
+        return new ApiResponse<>(
+                true,
+                "Authentification réussie",
+                "Connexion effectuée avec succès.",
+                authenticationResponse
+        );
     }
+
 
     private AuthenticationResponse getAuthenticationResponse(
             User user, User savedUser, String jwtToken

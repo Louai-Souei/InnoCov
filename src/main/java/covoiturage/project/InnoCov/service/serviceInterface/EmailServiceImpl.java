@@ -14,7 +14,7 @@ public class EmailServiceImpl {
 
     private final JavaMailSender mailSender;
 
-    public void sendWelcomeEmail(String toEmail, String prenom, String nom) {
+    public void sendWelcomeEmail(String toEmail, String firstname, String lastname) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
@@ -73,7 +73,7 @@ public class EmailServiceImpl {
                     </div>
                   </body>
               </html>
-            """.formatted(prenom, nom);
+            """.formatted(firstname, lastname);
 
             helper.setTo(toEmail);
             helper.setSubject(subject);
@@ -87,7 +87,7 @@ public class EmailServiceImpl {
         }
     }
 
-    public void sendRejectReservationEmail(String toEmail, String prenom, String nom, Route route) {
+    public void sendRejectReservationEmail(String toEmail, String firstname, String lastname, Route route) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
@@ -148,7 +148,7 @@ public class EmailServiceImpl {
                     </div>
                   </body>
               </html>
-            """.formatted(prenom, nom, route.getDeparture(), route.getArrival(), route.getDepartureDate());
+            """.formatted(firstname, lastname, route.getDeparture(), route.getArrival(), route.getDepartureDate());
 
             helper.setTo(toEmail);
             helper.setSubject(subject);
@@ -162,7 +162,7 @@ public class EmailServiceImpl {
         }
     }
 
-    public void sendAcceptReservationEmail(String toEmail, String prenom, String nom, Route route) {
+    public void sendAcceptReservationEmail(String toEmail, String firstname, String lastname, Route route) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
@@ -223,7 +223,7 @@ public class EmailServiceImpl {
                 </div>
               </body>
           </html>
-        """.formatted(prenom, nom, route.getDeparture(), route.getArrival(), route.getDepartureDate());
+        """.formatted(firstname, lastname, route.getDeparture(), route.getArrival(), route.getDepartureDate());
 
             helper.setTo(toEmail);
             helper.setSubject(subject);
@@ -235,6 +235,103 @@ public class EmailServiceImpl {
         } catch (MessagingException e) {
             throw new RuntimeException("Erreur lors de l'envoi de l'e-mail de confirmation", e);
         }
+
     }
+
+    public void sendDriverReservationNotification(String toEmail, String firstname, String lastname, Route route) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+            String subject = "Nouvelle réservation de trajet";
+            String htmlContent = """
+        <html>
+            <head>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  background-color: #f4f4f4;
+                  margin: 0;
+                  padding: 0;
+                }
+                .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  background-color: #fff;
+                  border-radius: 10px;
+                  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                  text-align: center;
+                  margin-bottom: 20px;
+                }
+                .details {
+                  margin: 20px 0;
+                  padding: 10px;
+                  background-color: #d1ecf1;
+                  color: #0c5460;
+                  border: 1px solid #bee5eb;
+                  border-radius: 5px;
+                }
+                .button {
+                  display: inline-block;
+                  padding: 10px 20px;
+                  margin: 20px 0;
+                  background-color: #28a745;
+                  color: white;
+                  text-decoration: none;
+                  font-size: 16px;
+                  border-radius: 5px;
+                  text-align: center;
+                }
+                .button:hover {
+                  background-color: #218838;
+                }
+                .footer {
+                  margin-top: 20px;
+                  text-align: center;
+                  color: #6c757d;
+                  font-size: 14px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h2>Nouvelle réservation reçue !</h2>
+                </div>
+                <p>Bonjour %s %s,</p>
+                <p>Un passager a réservé l'un de vos trajets :</p>
+                <div class="details">
+                  <p><strong>Départ :</strong> %s</p>
+                  <p><strong>Arrivée :</strong> %s</p>
+                  <p><strong>Date :</strong> %s</p>
+                </div>
+                <p>Nous vous invitons à répondre rapidement à cette réservation pour confirmer ou refuser la demande.</p>
+                <div style="text-align: center;">
+                  <a href="http://localhost:4200/driver/MyBooking" class="button">Répondre à la réservation</a>
+                </div>
+                <p>Merci de votre engagement et de votre professionnalisme.</p>
+                <div class="footer">
+                  <p>Cordialement,<br>L'Équipe Technique</p>
+                </div>
+              </div>
+            </body>
+        </html>
+        """.formatted(firstname, lastname, route.getDeparture(), route.getArrival(), route.getDepartureDate());
+
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+            helper.setFrom("votre.email@gmail.com");
+
+            mailSender.send(mimeMessage);
+            System.out.println("Email de notification envoyé au conducteur à " + toEmail);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Erreur lors de l'envoi de l'e-mail de notification au conducteur", e);
+        }
+    }
+
 
 }

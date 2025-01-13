@@ -43,8 +43,12 @@ public class RouteDto implements Convertible<Route> {
         this.createdAt = route.getCreatedAt();
         this.driver = new UserDto(route.getDriver());
         this.passengers = passengers.stream().map(UserDto::new).collect(Collectors.toList());
-        this.remainingSeats = route.getNumberOfPassengers() - route.getBookings().size();
+        long acceptedBookingsCount = route.getBookings().stream()
+                .filter(booking -> "accepted".equals(booking.getStatus()))
+                .count();
+        this.remainingSeats = route.getNumberOfPassengers() - (int) acceptedBookingsCount;
     }
+
 
     @Override
     public Route convert() {

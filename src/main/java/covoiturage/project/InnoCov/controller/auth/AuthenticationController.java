@@ -5,6 +5,7 @@ import covoiturage.project.InnoCov.dto.auth.RegisterRequest;
 import covoiturage.project.InnoCov.entity.enums.Occupation;
 import covoiturage.project.InnoCov.entity.enums.Role;
 import covoiturage.project.InnoCov.service.serviceInterface.auth.AuthenticationService;
+import covoiturage.project.InnoCov.util.ApiResponse;
 import covoiturage.project.InnoCov.util.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +24,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> register(
             @RequestParam("firstname") String firstname,
             @RequestParam("lastname") String lastname,
             @RequestParam("phone") String phone,
@@ -35,15 +36,22 @@ public class AuthenticationController {
 
         RegisterRequest registerRequest = new RegisterRequest(firstname, lastname, phone, email, password, role, occupation);
 
-        AuthenticationResponse response = authenticationService.register(registerRequest, image);
+        ApiResponse<AuthenticationResponse> response = authenticationService.register(registerRequest, image);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> login(
             @RequestBody AuthenticationRequest request) {
-        return  ResponseEntity.ok(authenticationService.login(request));
+        ApiResponse<AuthenticationResponse> response = authenticationService.login(request);
+
+        if (!response.isSuccess()) {
+            return ResponseEntity.status(200).body(response);
+        }
+
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/refresh-token")
     public void refreshToken(

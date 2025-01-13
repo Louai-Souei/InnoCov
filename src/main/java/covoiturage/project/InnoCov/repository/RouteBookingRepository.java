@@ -16,7 +16,13 @@ public interface RouteBookingRepository extends JpaRepository<RouteBooking, Inte
 
     List<RouteBooking> findAll();
 
-    List<RouteBooking> findByRoute(Route route);
+    @Query("""
+            SELECT COUNT(DISTINCT rb.id)
+            FROM RouteBooking rb
+            WHERE rb.route = :route
+            AND rb.status = "accepted"
+            """)
+    int countAcceptedByRoute(Route route);
 
     @Query("""
             SELECT rb FROM RouteBooking rb

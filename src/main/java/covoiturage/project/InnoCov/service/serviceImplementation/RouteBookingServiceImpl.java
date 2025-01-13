@@ -41,8 +41,7 @@ public class RouteBookingServiceImpl implements RouteBookingService {
             User activeUser = authenticationService.getActiveUser();
             Route route = routeRepository.findById(routeId)
                     .orElseThrow(() -> new IllegalArgumentException("Route not found"));
-
-            long currentBookings = routeBookingRepository.countByRoute(route);
+            long currentBookings = routeBookingRepository.countAcceptedByRoute(route);
             if (currentBookings >= route.getNumberOfPassengers()) {
                 log.warn("Route is fully booked: {}", route.getId());
                 return ResponseEntity.badRequest()
@@ -53,8 +52,15 @@ public class RouteBookingServiceImpl implements RouteBookingService {
             routeBooking.setPassenger(activeUser);
             routeBooking.setRoute(route);
             routeBooking.setBookingDate(new Date());
-
             routeBookingRepository.save(routeBooking);
+
+            emailService.sendRejectReservationEmail(
+                    route.getDriver().getEmail(),
+                    route.getDriver().getFirstname(),
+                    route.getDriver().getLastname(),
+                    route
+            );
+
             log.info("Booking added successfully: {}", routeBooking);
 
             return ResponseEntity.ok(new ApiResponse<>(true, "Booking added successfully."));
@@ -159,30 +165,73 @@ public class RouteBookingServiceImpl implements RouteBookingService {
                 .map(RouteBookingDto::new)
                 .toList();
     }
-
     @Override
-    public void updateBookingStatus(Integer bookingId, String status) {
+    public ResponseEntity<ApiResponse<Void>> updateBookingStatus(Integer bookingId, String status) {
         RouteBooking booking = routeBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
-        booking.setStatus(status);
-        routeBookingRepository.save(booking);
-        if(status.equals("rejected")) {
-            emailService.sendRejectReservationEmail(
-                    booking.getPassenger().getEmail(),
-                    booking.getPassenger().getFirstname(),
-                    booking.getPassenger().getLastname(),
-                    booking.getRoute()
-            );
-        }
-        if(status.equals("accepted")) {
+
+        if ("accepted".equalsIgnoreCase(status)) {
+            long currentBookings = routeBookingRepository.countAcceptedByRoute(booking.getRoute());
+            if (currentBookings >= booking.getRoute().getNumberOfPassengers()) {
+                log.warn("Route {} is fully booked. Booking {} cannot be accepted.",
+                        booking.getRoute().getId(), bookingId);
+                ApiResponse<Void> response = new ApiResponse<>(
+                        false,
+                        "Booking Denied",
+                        "The route is fully booked. Unable to accept this booking."
+                );
+                return ResponseEntity.ok(response);
+            }
+
+            booking.setStatus(status);
+            routeBookingRepository.save(booking);
+
             emailService.sendAcceptReservationEmail(
                     booking.getPassenger().getEmail(),
                     booking.getPassenger().getFirstname(),
                     booking.getPassenger().getLastname(),
                     booking.getRoute()
             );
+
+            log.info("Booking {} has been accepted for route {}.", bookingId, booking.getRoute().getId());
+            ApiResponse<Void> response = new ApiResponse<>(
+                    true,
+                    "Booking Accepted",
+                    "The booking has been successfully accepted."
+            );
+            return ResponseEntity.ok(response);
         }
+
+        if ("rejected".equalsIgnoreCase(status)) {
+            booking.setStatus(status);
+            routeBookingRepository.save(booking);
+
+            emailService.sendRejectReservationEmail(
+                    booking.getPassenger().getEmail(),
+                    booking.getPassenger().getFirstname(),
+                    booking.getPassenger().getLastname(),
+                    booking.getRoute()
+            );
+
+            log.info("Booking {} has been rejected for route {}.", bookingId, booking.getRoute().getId());
+            ApiResponse<Void> response = new ApiResponse<>(
+                    true,
+                    "Booking Rejected",
+                    "The booking has been successfully rejected."
+            );
+            return ResponseEntity.ok(response);
+        }
+
+        log.warn("Unknown status '{}' for booking {}. No action taken.", status, bookingId);
+        ApiResponse<Void> response = new ApiResponse<>(
+                false,
+                "Invalid Status",
+                "The provided status is invalid. No action has been taken."
+        );
+        return ResponseEntity.ok(response);
     }
+
+
 
     @Transactional
     @Override

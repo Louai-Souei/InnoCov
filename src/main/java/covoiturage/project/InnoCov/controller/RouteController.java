@@ -6,6 +6,7 @@ import covoiturage.project.InnoCov.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class RouteController {
         return routeService.getAllRouteInformation(routeId);
     }
     @GetMapping("/driver-routes/{email}")
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<List<RouteDto>> getRoutesByDriverEmail(@PathVariable String email) {
         return routeService.getRoutesByDriverEmail(email);
     }

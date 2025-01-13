@@ -9,6 +9,7 @@ import covoiturage.project.InnoCov.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,22 +29,26 @@ public class RouteBookingController {
     }
 
     @GetMapping("/available-seats/{routeId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public int getAvailableSeats(@PathVariable Integer routeId) {
         return routeBookingService.getAvailableSeats(routeId);
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<RouteBookingDto> changeBookingStatus(@PathVariable Integer id, @RequestParam String status) {
         RouteBookingDto updatedBooking = routeBookingService.changeBookingStatus(id, status);
         return ResponseEntity.ok(updatedBooking);
     }
     @GetMapping("/by-passenger-email")
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<List<RouteBookingDto>> getRouteBookingsByPassengerEmail(@RequestParam String email) {
         List<RouteBookingDto> routeBookings = routeBookingService.getRouteBookingsByPassengerEmail(email);
         return ResponseEntity.ok(routeBookings);
     }
 
     @PutMapping("/cancel/{id}")
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<String> cancelBooking(
             @PathVariable Integer id,
             @RequestParam String passengerEmail) {
@@ -73,16 +78,13 @@ public class RouteBookingController {
     }
 
     @PutMapping("/{bookingId}/accept")
-    public ResponseEntity<Void> acceptBooking(@PathVariable Integer bookingId) {
-        routeBookingService.updateBookingStatus(bookingId, "accepted");
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse<Void>> acceptBooking(@PathVariable Integer bookingId) {
+        return routeBookingService.updateBookingStatus(bookingId, "accepted");
     }
 
     @PutMapping("/{bookingId}/reject")
-    public ResponseEntity<Void> rejectBooking(@PathVariable Integer bookingId) {
-        routeBookingService.updateBookingStatus(bookingId, "rejected");
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse<Void>> rejectBooking(@PathVariable Integer bookingId) {
+        return routeBookingService.updateBookingStatus(bookingId, "rejected");
     }
 
     @GetMapping("/routes-booked")

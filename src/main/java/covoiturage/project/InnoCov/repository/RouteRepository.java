@@ -24,13 +24,17 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
     List<Route> findAvailableRoutesWithCapacity();
 
     @Query("""
-            SELECT r 
-            FROM Route r 
-            WHERE r.departureDate >= :startOfDay
-            AND r.departureDate < :endOfDay
-            AND SIZE(r.bookings) < r.numberOfPassengers 
-            ORDER BY r.departureDate ASC
-        """)
+        SELECT r
+        FROM Route r
+        WHERE r.departureDate >= :startOfDay
+        AND r.departureDate < :endOfDay
+        AND (
+            SELECT COUNT(b)
+            FROM r.bookings b
+            WHERE b.status = 'accepted'
+        ) < r.numberOfPassengers
+        ORDER BY r.departureDate ASC
+    """)
     List<Route> findAvailableRoutesByDate(
             Date startOfDay,
             Date endOfDay);
