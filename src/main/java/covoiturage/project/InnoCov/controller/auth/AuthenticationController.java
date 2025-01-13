@@ -44,7 +44,6 @@ public class AuthenticationController {
     public ResponseEntity<ApiResponse<AuthenticationResponse>> login(
             @RequestBody AuthenticationRequest request) {
         ApiResponse<AuthenticationResponse> response = authenticationService.login(request);
-
         if (!response.isSuccess()) {
             return ResponseEntity.status(200).body(response);
         }

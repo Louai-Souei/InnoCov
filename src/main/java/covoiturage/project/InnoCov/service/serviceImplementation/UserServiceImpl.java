@@ -6,7 +6,10 @@ import covoiturage.project.InnoCov.repository.RouteBookingRepository;
 import covoiturage.project.InnoCov.repository.RouteRepository;
 import covoiturage.project.InnoCov.repository.UserRepository;
 import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
+import covoiturage.project.InnoCov.service.serviceInterface.EmailServiceImpl;
 import covoiturage.project.InnoCov.service.serviceInterface.UserService;
+import covoiturage.project.InnoCov.tools.tokenTools.Token;
+import covoiturage.project.InnoCov.tools.tokenTools.TokenRepository;
 import covoiturage.project.InnoCov.util.ApiResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,8 @@ public class UserServiceImpl  implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RouteRepository routeRepository;
     private final RouteBookingRepository routeBookingRepository;
+    private final TokenRepository tokenRepository;
+    private  final EmailServiceImpl emailService;
 
 
     @Override
@@ -69,6 +74,12 @@ public class UserServiceImpl  implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setStatus(true);
         userRepository.save(user);
+        emailService.sendAccountReactivationNotification(
+                user.getEmail(),
+                user.getFirstname(),
+                user.getLastname(),
+                user.getEmail()
+        );
         return new UserDto(user);
     }
 
@@ -76,8 +87,21 @@ public class UserServiceImpl  implements UserService {
     public UserDto deactivateUser(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         user.setStatus(false);
         userRepository.save(user);
+
+        List<Token> validTokens = tokenRepository.findAllValidTokensByUser(user.getId());
+        validTokens.forEach(token -> {
+            token.setRevoked(true);
+            token.setExpired(true);
+            tokenRepository.save(token);
+        });
+        emailService.sendUserBlockedNotification(
+                user.getEmail(),
+                user.getFirstname(),
+                user.getLastname()
+        );
         return new UserDto(user);
     }
 

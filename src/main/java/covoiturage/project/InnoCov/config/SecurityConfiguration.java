@@ -52,7 +52,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/user/activate/**").hasRole(ADMIN.name())
                                 .requestMatchers("/user/deactivate/**").hasRole(ADMIN.name())
                                 .requestMatchers("/route-booking/new-booking/**").hasRole(PASSENGER.name())
-                                .requestMatchers("/api/route/available").hasRole(PASSENGER.name())
+                                .requestMatchers("/route/available").hasRole(PASSENGER.name())
                                 .requestMatchers("/route/driver-routes/").hasRole(DRIVER.name())
                                 .requestMatchers(HttpMethod.PUT, "/route-booking/**").hasAnyRole(DRIVER.name(), PASSENGER.name())
                                 .requestMatchers("/complaint/new-complaint").hasAnyRole(PASSENGER.name(), DRIVER.name())

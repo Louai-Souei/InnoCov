@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -69,6 +70,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(registerRequest.getRole())
                 .occupation(registerRequest.getOccupation())
+                .status(true)
                 .userImage(image.getBytes())
                 .build();
         var savedUser = userRepository.save(user);
@@ -91,17 +93,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return new ApiResponse<>(
                     false,
                     "Compte bloqué",
-                    "Your account is blocked. contact administrator.",
+                    "Your account is blocked. Contact administrator.",
                     null
             );
         }
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.getEmail(),
-                        authenticationRequest.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.getEmail(),
+                            authenticationRequest.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            return new ApiResponse<>(
+                    false,
+                    "Login Failed",
+                    "Login and Password do not match.",
+                    null
+            );
+        }
 
         var jwtToken = jwtServiceImpl.generateToken(user);
         revokeAllUserTokens(user);
@@ -114,6 +125,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 authenticationResponse
         );
     }
+
 
 
     private AuthenticationResponse getAuthenticationResponse(

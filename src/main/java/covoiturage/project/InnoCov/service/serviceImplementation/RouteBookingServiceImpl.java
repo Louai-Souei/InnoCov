@@ -54,7 +54,7 @@ public class RouteBookingServiceImpl implements RouteBookingService {
             routeBooking.setBookingDate(new Date());
             routeBookingRepository.save(routeBooking);
 
-            emailService.sendRejectReservationEmail(
+            emailService.sendDriverReservationNotification(
                     route.getDriver().getEmail(),
                     route.getDriver().getFirstname(),
                     route.getDriver().getLastname(),
