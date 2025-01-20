@@ -31,7 +31,7 @@ import static covoiturage.project.InnoCov.entity.enums.Role.*;
 
 public class SecurityConfiguration {
 
-    public static final String WHITE_LIST_URL = "/auth/**";
+    public static final String WHITE_LIST_URL = "/**";
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
