@@ -1,10 +1,7 @@
 package covoiturage.project.InnoCov.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
@@ -21,10 +18,12 @@ public class RouteBooking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passenger_id", nullable = false)
+    @ToString.Exclude
     private User passenger;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "route_id", nullable = false)
+    @ToString.Exclude
     private Route route;
 
     @Column(nullable = false)

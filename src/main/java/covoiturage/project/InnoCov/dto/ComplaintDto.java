@@ -38,12 +38,6 @@ public class ComplaintDto implements Convertible<Complaint> {
         complaint.setDescription(description);
         complaint.setCreatedAt(createdAt);
         complaint.setComplaintType(complaintType);
-        if (this.complainer != null) {
-            complaint.setComplainer(this.complainer.convert());
-        }
-        if (this.targetUser != null) {
-            complaint.setTargetUser(this.targetUser.convert());
-        }
         complaint.setResolved(resolved);
         return complaint;
 

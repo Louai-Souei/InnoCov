@@ -56,9 +56,11 @@ public class User implements UserDetails {
     private byte[] userImage;
 
     @OneToMany(mappedBy = "complainer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Complaint> complaintsMade = new ArrayList<>();
 
     @OneToMany(mappedBy = "targetUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Complaint> complaintsReceived = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -66,10 +68,15 @@ public class User implements UserDetails {
     private List<Token> tokens;
 
     @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Route> drivenRoutes = new ArrayList<>();
 
     @OneToMany(mappedBy = "passenger", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RouteBooking> bookings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "notifiedUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Notification> notificationsReceived = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

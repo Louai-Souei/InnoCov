@@ -31,7 +31,7 @@ import static covoiturage.project.InnoCov.entity.enums.Role.*;
 
 public class SecurityConfiguration {
 
-    public static final String WHITE_LIST_URL = "/auth/**";
+    public static final String[] WHITE_LIST_URL = {"/auth/**"};
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
@@ -43,6 +43,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
+                                .requestMatchers("/ws/**").permitAll()
                                 .requestMatchers("/complaint/all-complaints").hasRole(ADMIN.name())
                                 .requestMatchers("/complaint/complaints-by-target/**").hasRole(ADMIN.name())
                                 .requestMatchers("/route-booking/route-bookings-creation-stats").hasRole(ADMIN.name())
@@ -78,6 +79,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

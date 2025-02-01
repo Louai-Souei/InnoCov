@@ -2,9 +2,12 @@ package covoiturage.project.InnoCov.service.serviceImplementation;
 
 import covoiturage.project.InnoCov.dto.RouteBookingDto;
 import covoiturage.project.InnoCov.dto.RouteDto;
+import covoiturage.project.InnoCov.entity.Notification;
 import covoiturage.project.InnoCov.entity.Route;
 import covoiturage.project.InnoCov.entity.RouteBooking;
 import covoiturage.project.InnoCov.entity.User;
+import covoiturage.project.InnoCov.entity.enums.NotificationStatus;
+import covoiturage.project.InnoCov.repository.NotificationRepository;
 import covoiturage.project.InnoCov.repository.RouteBookingRepository;
 import covoiturage.project.InnoCov.repository.RouteRepository;
 import covoiturage.project.InnoCov.service.serviceImplementation.auth.AuthenticationServiceImpl;
@@ -33,6 +36,8 @@ public class RouteBookingServiceImpl implements RouteBookingService {
     private final RouteRepository routeRepository;
     private final AuthenticationServiceImpl authenticationService;
     private final EmailServiceImpl emailService;
+    private final NotificationServiceImpl   notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -61,6 +66,27 @@ public class RouteBookingServiceImpl implements RouteBookingService {
                     route
             );
 
+            Notification notification = Notification.builder()
+                    .message("you're good")
+                    .status(NotificationStatus.BORROWED)
+                    .build();
+            notificationService.sendNotification(
+                    activeUser.getId().toString(),
+                    notification
+            );
+            notification.setNotifiedUser(activeUser);
+            notificationRepository.save(notification);
+            Notification driverNotification = Notification.builder()
+                    .message("you have new booking")
+                    .status(NotificationStatus.BORROWED)
+                    .build();
+
+            notificationService.sendNotification(
+                    route.getDriver().getId().toString(),
+                    driverNotification
+            );
+            driverNotification.setNotifiedUser(route.getDriver());
+            notificationRepository.save(driverNotification);
             log.info("Booking added successfully: {}", routeBooking);
 
             return ResponseEntity.ok(new ApiResponse<>(true, "Booking added successfully."));

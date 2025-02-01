@@ -20,11 +20,11 @@ INSERT INTO user (id, phone, firstname, lastname, email, password, occupation, r
 INSERT INTO user (id, phone, firstname, lastname, email, password, occupation, role, created_at, updated_at, status) VALUES (10, '12312354', 'Julie', 'Fabre', 'user10@email.com', '$2a$10$wae0VqErlj5hCl8nE8XUBOElXu91rbYEqMZWovQ5JJeClPq3exuni', 'TEACHER', 'PASSENGER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true);
 
 ------------------------------------------------ INSERT ROUTES ------------------------------------------------
-INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (1, 'Paris', 'Lyon', '2025-01-05 08:00:00', 3, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (2, 'Marseille', 'Nice', '2025-01-10 09:30:00', 4, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (3, 'Bordeaux', 'Toulouse', '2025-01-15 14:00:00', 2, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (4, 'Lille', 'Bruxelles', '2025-01-20 07:45:00', 3, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (5, 'Strasbourg', 'Mulhouse', '2024-01-25 12:15:00', 1, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (1, 'Paris', 'Lyon', '2025-03-05 08:00:00', 3, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (2, 'Marseille', 'Nice', '2025-03-10 09:30:00', 4, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (3, 'Bordeaux', 'Toulouse', '2025-03-15 14:00:00', 2, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (4, 'Lille', 'Bruxelles', '2025-03-20 07:45:00', 3, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO route (id, departure, arrival, departure_date, number_of_passengers, driver_id, created_at, updated_at) VALUES (5, 'Strasbourg', 'Mulhouse', '2025-03-25 12:15:00', 1, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 ------------------------------------------------ INSERT COMPLAINTS ------------------------------------------------
